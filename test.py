@@ -7,7 +7,7 @@ import json
 import bert_encoder
 
 # Hyper Parameters
-EPOCH = 150
+EPOCH = 100
 BATCH_SIZE = 50
 LR = 1e-3
 
@@ -34,10 +34,13 @@ class CustomDataset(Dataset):
                 else:
                     self.label.append(negative)
                 passage["passage"] = passage["passage"][128:]
+            
+
+
         inp.close()
-        if use_cuda:
-            self.data = torch.FloatTensor(self.data).cuda()
-            self.label = torch.FloatTensor(self.label).cuda()
+        #if use_cuda:
+        #    self.data = torch.FloatTensor(self.data).cuda()
+        #    self.label = torch.FloatTensor(self.label).cuda()
 
     def __getitem__(self, index):
         return self.data[index], self.label[index]
@@ -88,6 +91,9 @@ loss_func = nn.BCELoss() #for float
 for epoch in range(EPOCH):
     for step, data in enumerate(train_loader):
         vec, label = data
+        if use_cuda:
+            vec = vec.cuda()
+            label = label.cuda()
         output = cnn(vec)
         loss = loss_func(output, label)
         optimizer.zero_grad()
@@ -98,13 +104,18 @@ for epoch in range(EPOCH):
         if step % 1 == 0:
             output = output - label #count right answer
             accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
-            print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.2f' % accuracy)
+            print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
 
 #test
+right, total = 0, 0
 for step, data in enumerate(test_loader):
     vec, label = data
+    if use_cuda:
+        vec = vec.cuda()
+        label = label.cuda()
     output = cnn(vec)
-    if step % 1 == 0:
-        output = output - label
-        accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
-        print('Accuracy:%.2f' % accuracy)
+    output = output - label
+    right += output[((output >= -0.5) & (output <= 0.5))].size(0)
+    total += label.size(0)
+accuracy = float(right) / float(total)
+print('Accuracy:%.3f' % accuracy)
