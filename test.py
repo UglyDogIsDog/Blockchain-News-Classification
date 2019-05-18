@@ -7,9 +7,13 @@ import json
 import bert_encoder
 
 # Hyper Parameters
-EPOCH = 100
+EPOCH = 150
 BATCH_SIZE = 50
-LR = 1e-4
+LR = 1e-3
+
+use_cuda = False
+if torch.cuda.is_available():
+    use_cuda = True
 
 #customized loading data
 class CustomDataset(Dataset):
@@ -22,6 +26,7 @@ class CustomDataset(Dataset):
         positive = torch.FloatTensor([1])
         negative = torch.FloatTensor([0])
         for passage in passages:
+            print(len(passage["passage"]))
             while len(passage["passage"]) > 32: #abandon too short section
                 self.data.append(torch.FloatTensor(be.encode(passage["passage"][:128])).squeeze(0).transpose(0, 1))
                 if passage["label"] == 1:
@@ -30,6 +35,9 @@ class CustomDataset(Dataset):
                     self.label.append(negative)
                 passage["passage"] = passage["passage"][128:]
         inp.close()
+        if use_cuda:
+            self.data = torch.FloatTensor(self.data).cuda()
+            self.label = torch.FloatTensor(self.label).cuda()
 
     def __getitem__(self, index):
         return self.data[index], self.label[index]
@@ -71,6 +79,8 @@ class CNN(nn.Module):
 
 cnn = CNN(768, 1) #bert output a vector of 768 for every word, 
                   #and the output mental analysis is binary classification
+if use_cuda:
+    cnn = cnn.cuda()
 optimizer = torch.optim.Adam(cnn.parameters(),lr = LR)
 loss_func = nn.BCELoss() #for float
 
