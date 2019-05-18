@@ -108,6 +108,8 @@ for epoch in range(EPOCH):
 
 #test
 right, total = 0, 0
+right_neg, total_neg = 0, 0
+right_pos, total_pos = 0, 0
 for step, data in enumerate(test_loader):
     vec, label = data
     if use_cuda:
@@ -115,7 +117,13 @@ for step, data in enumerate(test_loader):
         label = label.cuda()
     output = cnn(vec)
     output = output - label
+    right_neg += output[(output <= 0.5)].size(0)
+    total_neg += label[(label <= 0.5)].size(0)
+    right_pos += output[(output >= -0.5)].size(0)
+    total_pos += label[(label >= 0.5)].size(0)
     right += output[((output >= -0.5) & (output <= 0.5))].size(0)
     total += label.size(0)
-accuracy = float(right) / float(total)
-print('Accuracy:%.3f' % accuracy)
+
+print('Accuracy:%.3f' % (float(right) / float(total)))
+print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
+print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
