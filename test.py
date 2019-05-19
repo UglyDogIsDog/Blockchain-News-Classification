@@ -134,7 +134,7 @@ for epoch in range(EPOCH):
         optimizer.step()
 
         #output process every 100 batch
-        if step % 1 == 0:
+        if step % 20 == 0:
             output = output - label #count right answer
             accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
             print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
