@@ -7,10 +7,14 @@ import json
 import bert_encoder
 import os
 import random
+import sys
 
 # Hyper Parameters
-print("input epoch")
-EPOCH = int(input())
+if len(sys.argv) == 1:
+    print("Error: input epoch first")
+    sys.exit()
+
+EPOCH = int(sys.argv[1])
 BATCH_SIZE = 50
 LR = 1e-3
 
