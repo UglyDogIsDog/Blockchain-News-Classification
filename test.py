@@ -17,7 +17,7 @@ if len(sys.argv) == 1:
 
 EPOCH = int(sys.argv[1])
 BATCH_SIZE = 50
-LR = 1e-3
+LR = 1e-4
 
 use_cuda = False
 if torch.cuda.is_available():
@@ -152,14 +152,14 @@ for epoch in range(EPOCH):
 
         #output process every 100 batch
         if step % 100 == 0:
-            pred = torch.max(output, 1)[1].data.numpy()
-            accuracy = float((pred == label.data.numpy()).astype(int).sum()) / float(label.size(0))
+            pred = torch.max(output, 1)[1]
+            accuracy = float(label[pred == label].size(0)) / float(label.size(0))
             #output = output - label #count right answer
             #accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
             print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
 
 #test
-#right, total = 0, 0
+right, total = 0, 0
 right_neg, total_neg = 0, 0
 right_pos, total_pos = 0, 0
 for step, data in enumerate(test_loader):
@@ -173,19 +173,20 @@ for step, data in enumerate(test_loader):
     #print(output)
     #output = output - label
     #print(output)
-    pred = torch.max(output, 1)[1].data.numpy()
-    accuracy = float((pred == label.data.numpy()).astype(int).sum()) / float(label.size(0))
-    print('Accuracy:%.3f' % accuracy)
-    '''right_neg += output[(label < 0.5) & (output < 0.5)].size(0)
-    total_neg += label[(label < 0.5)].size(0)
-    right_pos += output[(label > 0.5) & (output > 0.5)].size(0)
-    total_pos += label[(label > 0.5)].size(0)'''
-    #right += output[((output >= -0.5) & (output <= 0.5))].size(0)
-    #total += label.size(0)
-'''
+    pred = torch.max(output, 1)[1]
+    #accuracy = float(label[pred == label].size(0)) / float(label.size(0))
+    #accuracy_pos = float(label[(pred == label) & (label == 1)].size(0)) / float(label[label == 1].size(0))
+    #accuracy_neg = float(label[(pred == label) & (label == 0)].size(0)) / float(label[label == 0].size(0))
+    right_neg += label[(pred == label) & (label == 0)].size(0)
+    total_neg += label[label == 1].size(0)
+    right_pos += label[(pred == label) & (label == 1)].size(0)
+    total_pos += label[label == 0].size(0)
+    right += label[pred == label].size(0)
+    total += label.size(0)
+
 print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
 #print(right, " ", total)
 print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
 print(right_neg, " ", total_neg)
 print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-print(right_pos, " ", total_pos)'''
+print(right_pos, " ", total_pos)
