@@ -93,12 +93,12 @@ class CNN(nn.Module):
         )
         #pool_layer
         self.pool = nn.Sequential(
-           nn.MaxPool1d(2)
+           nn.MaxPool1d(4,stride = 2,padding = 2)
         )
         # fully connected layers
         self.fc = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(128 * 8, 128),
+            nn.Linear(128 * 10, 128),
         	nn.ReLU(),
         	nn.Dropout(),
         	nn.Linear(128, out_class),
