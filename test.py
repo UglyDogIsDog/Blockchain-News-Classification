@@ -95,6 +95,7 @@ for epoch in range(EPOCH):
             vec = vec.cuda()
             label = label.cuda()
         output = cnn(vec)
+        print(output)
         loss = loss_func(output, label)
         optimizer.zero_grad()
         loss.backward()
