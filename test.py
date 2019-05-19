@@ -98,7 +98,7 @@ class CNN(nn.Module):
         # fully connected layers
         self.fc = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(128 * 10, 128),
+            nn.Linear(128 * 9, 128),
         	nn.ReLU(),
         	nn.Dropout(),
         	nn.Linear(128, out_class),
