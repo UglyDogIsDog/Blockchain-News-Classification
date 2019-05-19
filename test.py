@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 # Hyper Parameters
-EPOCH = 10
+EPOCH = 100
 BATCH_SIZE = 50
 LR = 1e-4
 
@@ -30,18 +30,25 @@ class CustomDataset(Dataset):
         self.data = []
         self.label = []
         be = bert_encoder.BertEncoder()
-        positive = torch.FloatTensor([1])
-        negative = torch.FloatTensor([0])
+        #pos_num, neg_num = 0, 0
         for passage in passages:
             print(len(passage["passage"]))
             while len(passage["passage"]) > 32: #abandon too short section
                 self.data.append(torch.FloatTensor(be.encode(passage["passage"][:128])).squeeze(0).transpose(0, 1))
                 if passage["label"] == 1:
-                    self.label.append(positive)
+                    self.label.append(torch.FloatTensor([1]))
+                    #pos_num += 1
                 else:
-                    self.label.append(negative)
+                    self.label.append(torch.FloatTensor([0]))
+                    #neg_num += 1
                 passage["passage"] = passage["passage"][128:]
         inp.close()
+
+        #pos_total, neg_total = pos_num, neg_num
+        #while pos_num < neg_num:
+
+
+        
         
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
