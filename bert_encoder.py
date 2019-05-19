@@ -22,7 +22,7 @@ flags.DEFINE_bool(
     "Whether to lower case the input text."
 )
 flags.DEFINE_integer(
-    "max_seq_length", 128,
+    "max_seq_length", 512,
     "The maximum total input sequence length after WordPiece tokenization."
 )
 
