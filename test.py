@@ -65,10 +65,14 @@ class CNN(nn.Module):
             nn.Conv1d(32, 16, 5, padding=2),
             nn.ReLU()
         )
+        #pool_layer
+        self.pool = nn.Sequential(
+           nn.MaxPool1d(2)
+        )
         # fully connected layers
         self.fc = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(128 * 16, 128),
+            nn.Linear(128 * 8, 128),
         	nn.ReLU(),
         	nn.Dropout(),
         	nn.Linear(128, out_class),
@@ -76,6 +80,12 @@ class CNN(nn.Module):
         )
     def forward(self, x):
         out = self.conv(x)
+        #池化层
+        out = out.permute(0,2,1)
+        out = self.pool(out)
+        out = out.permute(0,2,1)
+        out = out.contiguous()
+        
         out = out.view(out.size(0), -1) #unfold
         out = self.fc(out)
         return out
