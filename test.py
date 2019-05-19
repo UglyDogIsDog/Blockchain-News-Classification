@@ -40,8 +40,8 @@ class CustomDataset(Dataset):
         neg_index = []
         for passage in passages:
             print(len(passage["passage"]))
-            while len(passage["passage"]) > 32: #abandon too short section
-                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:128])).squeeze(0).transpose(0, 1))
+            while len(passage["passage"]) > 128: #abandon too short section
+                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:512])).squeeze(0).transpose(0, 1))
                 if passage["label"] == 1:
                     self.label.append(torch.FloatTensor([1]))
                     pos_num += 1
@@ -51,7 +51,7 @@ class CustomDataset(Dataset):
                     neg_num += 1
                     neg_index.append(num)
                 num += 1
-                passage["passage"] = passage["passage"][128:]
+                passage["passage"] = passage["passage"][512:]
         inp.close()
 
         while pos_num < neg_num:
@@ -98,10 +98,10 @@ class CNN(nn.Module):
         # fully connected layers
         self.fc = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(128 * 9, 128),
+            nn.Linear(512 * 9, 512),
         	nn.ReLU(),
         	nn.Dropout(),
-        	nn.Linear(128, out_class),
+        	nn.Linear(512, out_class),
             nn.Sigmoid()
         )
     def forward(self, x):
