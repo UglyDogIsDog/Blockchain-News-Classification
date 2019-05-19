@@ -10,7 +10,7 @@ import random
 
 # Hyper Parameters
 print("input epoch")
-EPOCH = input()
+EPOCH = int(input())
 BATCH_SIZE = 50
 LR = 1e-3
 
