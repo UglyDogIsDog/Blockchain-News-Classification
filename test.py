@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.utils.data as Data
+import torch.nn.functional as F
 from torch.utils.data.dataset import Dataset
 import torchvision
 import json
@@ -43,11 +44,11 @@ class CustomDataset(Dataset):
             while len(passage["passage"]) > 128: #abandon too short section
                 self.data.append(torch.FloatTensor(be.encode(passage["passage"][:512])).squeeze(0).transpose(0, 1))
                 if passage["label"] == 1:
-                    self.label.append(torch.FloatTensor([1]))
+                    self.label.append(1)
                     pos_num += 1
                     pos_index.append(num)
                 else:
-                    self.label.append(torch.FloatTensor([0]))
+                    self.label.append(0)
                     neg_num += 1
                     neg_index.append(num)
                 num += 1
@@ -113,7 +114,7 @@ class CNN(nn.Module):
         	nn.ReLU(),
         	nn.Dropout(),
         	nn.Linear(512, out_class),
-            nn.Sigmoid()
+            #nn.Sigmoid()
         )
     def forward(self, x):
         out = self.conv(x)
@@ -127,12 +128,12 @@ class CNN(nn.Module):
         out = self.fc(out)
         return out
 
-cnn = CNN(768, 1) #bert output a vector of 768 for every word, 
+cnn = CNN(768, 2) #bert output a vector of 768 for every word, 
                   #and the output mental analysis is binary classification
 if use_cuda:
     cnn = cnn.cuda()
 optimizer = torch.optim.Adam(cnn.parameters(),lr = LR)
-loss_func = nn.BCELoss() #for float
+loss_func = nn.CrossEntropyLoss() #nn.BCELoss() #for float
 
 #train
 for epoch in range(EPOCH):
@@ -142,16 +143,19 @@ for epoch in range(EPOCH):
             vec = vec.cuda()
             label = label.cuda()
         output = cnn(vec)
+        label = label.to(dtype=torch.int64)
         #print(output)
-        loss = loss_func(output, label)
+        loss = F.cross_entropy(output, label) #loss_func(output, label)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         #output process every 100 batch
         if step % 100 == 0:
-            output = output - label #count right answer
-            accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
+            pred = torch.max(output, 1)[1].data.numpy()
+            accuracy = float((pred == label.data.numpy()).astype(int).sum()) / float(label.size(0))
+            #output = output - label #count right answer
+            #accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
             print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
 
 #test
@@ -165,19 +169,23 @@ for step, data in enumerate(test_loader):
         label = label.cuda()
     #print(vec)
     output = cnn(vec)
+    label = label.to(dtype=torch.int64)
     #print(output)
     #output = output - label
     #print(output)
-    right_neg += output[(label < 0.5) & (output < 0.5)].size(0)
+    pred = torch.max(output, 1)[1].data.numpy()
+    accuracy = float((pred == label.data.numpy()).astype(int).sum()) / float(label.size(0))
+    print('Accuracy:%.3f' % accuracy)
+    '''right_neg += output[(label < 0.5) & (output < 0.5)].size(0)
     total_neg += label[(label < 0.5)].size(0)
     right_pos += output[(label > 0.5) & (output > 0.5)].size(0)
-    total_pos += label[(label > 0.5)].size(0)
+    total_pos += label[(label > 0.5)].size(0)'''
     #right += output[((output >= -0.5) & (output <= 0.5))].size(0)
     #total += label.size(0)
-
+'''
 print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
 #print(right, " ", total)
 print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
 print(right_neg, " ", total_neg)
 print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-print(right_pos, " ", total_pos)
+print(right_pos, " ", total_pos)'''
