@@ -6,7 +6,7 @@ import torchvision
 import json
 import bert_encoder
 import os
-import pickle
+import numpy as np
 
 # Hyper Parameters
 EPOCH = 100
@@ -20,10 +20,9 @@ if torch.cuda.is_available():
 #customized loading data
 class CustomDataset(Dataset):
     def __init__(self, path):
-        if os.path.isfile(path + ".dat"):    
-            f = open(path + ".dat", 'rb')
-            self.data, self.label = pickle.load(f)
-            f.close()
+        if os.path.isfile(path + ".dat") and os.path.isfile(path + ".lab"):    
+            self.data = torch.load(path + ".dat")
+            self.label = torch.load(path + ".lab")
             return
 
         inp = open(path, "rb")
@@ -44,9 +43,8 @@ class CustomDataset(Dataset):
                 passage["passage"] = passage["passage"][128:]
         inp.close()
         
-        f = open(path + ".dat", 'wb')
-        pickle.dump((self.data, self.label), f)
-        f.close()
+        torch.save(self.data, path + ".dat")
+        torch.save(self.label, path + ".lab")
 
     def __getitem__(self, index):
         return self.data[index], self.label[index]
