@@ -27,7 +27,7 @@ print(pos_count, " ", neg_count)
 count = 0
 
 while True:
-    index = random.randint(0, len(passages))
+    index = random.randint(0, len(passages) - 1)
     if 'label' in passages[index].keys():
         continue
     print("No.%d" % (count + 1))

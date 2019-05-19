@@ -6,7 +6,7 @@ import torchvision
 import json
 import bert_encoder
 import os
-import numpy as np
+import random
 
 # Hyper Parameters
 EPOCH = 100
@@ -30,24 +30,34 @@ class CustomDataset(Dataset):
         self.data = []
         self.label = []
         be = bert_encoder.BertEncoder()
-        #pos_num, neg_num = 0, 0
+        pos_num, neg_num, num = 0, 0, 0
+        pos_index = []
+        neg_index = []
         for passage in passages:
             print(len(passage["passage"]))
             while len(passage["passage"]) > 32: #abandon too short section
                 self.data.append(torch.FloatTensor(be.encode(passage["passage"][:128])).squeeze(0).transpose(0, 1))
                 if passage["label"] == 1:
                     self.label.append(torch.FloatTensor([1]))
-                    #pos_num += 1
+                    pos_num += 1
+                    pos_index.append(num)
                 else:
                     self.label.append(torch.FloatTensor([0]))
-                    #neg_num += 1
+                    neg_num += 1
+                    neg_index.append(num)
+                num += 1
                 passage["passage"] = passage["passage"][128:]
         inp.close()
 
-        #pos_total, neg_total = pos_num, neg_num
-        #while pos_num < neg_num:
+        while pos_num < neg_num:
+            self.data.append(self.data[pos_index[random.randint(0, len(pos_index) - 1)]].clone())
+            self.label.append(torch.FloatTensor([1]))
+            pos_num += 1
 
-
+        while pos_num > neg_num:
+            self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
+            self.label.append(torch.FloatTensor([0]))
+            neg_num += 1
         
         
         torch.save(self.data, path + ".dat")
@@ -139,7 +149,7 @@ for step, data in enumerate(test_loader):
         label = label.cuda()
     #print(vec)
     output = cnn(vec)
-    print(output)
+    #print(output)
     output = output - label
     #print(output)
     right_neg += output[(output >= 0) & (output <= 0.5)].size(0)
