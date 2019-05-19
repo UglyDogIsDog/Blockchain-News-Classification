@@ -9,7 +9,7 @@ import os
 import numpy as np
 
 # Hyper Parameters
-EPOCH = 100
+EPOCH = 10
 BATCH_SIZE = 50
 LR = 1e-4
 
@@ -109,7 +109,7 @@ for epoch in range(EPOCH):
             vec = vec.cuda()
             label = label.cuda()
         output = cnn(vec)
-        print(output)
+        #print(output)
         loss = loss_func(output, label)
         optimizer.zero_grad()
         loss.backward()
@@ -130,21 +130,21 @@ for step, data in enumerate(test_loader):
     if use_cuda:
         vec = vec.cuda()
         label = label.cuda()
-    print(vec)
+    #print(vec)
     output = cnn(vec)
     print(output)
     output = output - label
     #print(output)
-    #right_neg += output[(output >= 0) & (output <= 0.5)].size(0)
-    #total_neg += label[(label <= 0.5)].size(0)
-    #right_pos += output[(output >= -0.5) & (output <= 0)].size(0)
-    #total_pos += label[(label >= 0.5)].size(0)
+    right_neg += output[(output >= 0) & (output <= 0.5)].size(0)
+    total_neg += label[(label <= 0.5)].size(0)
+    right_pos += output[(output >= -0.5) & (output <= 0)].size(0)
+    total_pos += label[(label >= 0.5)].size(0)
     right += output[((output >= -0.5) & (output <= 0.5))].size(0)
     total += label.size(0)
 
 print('Accuracy:%.3f' % (float(right) / float(total)))
 print(right, " ", total)
-#print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
-#print(right_neg, " ", total_neg)
-#print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-#print(right_pos, " ", total_pos)
+print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
+print(right_neg, " ", total_neg)
+print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
+print(right_pos, " ", total_pos)
