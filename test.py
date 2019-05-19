@@ -9,7 +9,7 @@ import os
 import random
 
 # Hyper Parameters
-EPOCH = 100
+EPOCH = 50
 BATCH_SIZE = 50
 LR = 1e-4
 
