@@ -55,6 +55,17 @@ class CustomDataset(Dataset):
         inp.close()
 
         while pos_num < neg_num:
+            self.data.pop(neg_index[neg_num - 1])
+            self.label.pop(neg_index[neg_num - 1])
+            neg_num -= 1
+
+        while pos_num > neg_num:
+            self.data.pop(pos_index[pos_num - 1])
+            self.label.pop(pos_index[pos_num - 1])
+            pos_num -= 1
+
+        '''
+        while pos_num < neg_num:
             self.data.append(self.data[pos_index[random.randint(0, len(pos_index) - 1)]].clone())
             self.label.append(torch.FloatTensor([1]))
             pos_num += 1
@@ -63,7 +74,7 @@ class CustomDataset(Dataset):
             self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
             self.label.append(torch.FloatTensor([0]))
             neg_num += 1
-        
+        '''
         
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
@@ -167,6 +178,6 @@ for step, data in enumerate(test_loader):
 print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
 #print(right, " ", total)
 print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
-#print(right_neg, " ", total_neg)
+print(right_neg, " ", total_neg)
 print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-#print(right_pos, " ", total_pos)
+print(right_pos, " ", total_pos)
