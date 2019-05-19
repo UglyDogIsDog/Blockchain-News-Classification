@@ -7,9 +7,9 @@ import json
 import bert_encoder
 
 # Hyper Parameters
-EPOCH = 100
+EPOCH = 300
 BATCH_SIZE = 50
-LR = 1e-3
+LR = 1e-4
 
 use_cuda = False
 if torch.cuda.is_available():
@@ -117,9 +117,9 @@ for step, data in enumerate(test_loader):
         label = label.cuda()
     output = cnn(vec)
     output = output - label
-    right_neg += output[(output <= 0.5)].size(0)
+    right_neg += output[(output >= 0) & (output <= 0.5)].size(0)
     total_neg += label[(label <= 0.5)].size(0)
-    right_pos += output[(output >= -0.5)].size(0)
+    right_pos += output[(output >= -0.5) & (output <= 0)].size(0)
     total_pos += label[(label >= 0.5)].size(0)
     right += output[((output >= -0.5) & (output <= 0.5))].size(0)
     total += label.size(0)
