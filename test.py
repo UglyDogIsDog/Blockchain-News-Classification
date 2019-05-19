@@ -5,6 +5,8 @@ from torch.utils.data.dataset import Dataset
 import torchvision
 import json
 import bert_encoder
+import os
+import pickle
 
 # Hyper Parameters
 EPOCH = 100
@@ -18,6 +20,12 @@ if torch.cuda.is_available():
 #customized loading data
 class CustomDataset(Dataset):
     def __init__(self, path):
+        if os.path.isfile(path + ".dat"):    
+            f = open(path + ".dat", 'rb')
+            self.data, self.label = pickle.load(f)
+            f.close()
+            return
+
         inp = open(path, "rb")
         passages = json.load(inp)
         self.data = []
@@ -34,13 +42,11 @@ class CustomDataset(Dataset):
                 else:
                     self.label.append(negative)
                 passage["passage"] = passage["passage"][128:]
-            
-
-
         inp.close()
-        #if use_cuda:
-        #    self.data = torch.FloatTensor(self.data).cuda()
-        #    self.label = torch.FloatTensor(self.label).cuda()
+        
+        f = open(path + ".dat", 'wb')
+        pickle.dump((self.data, self.label), f)
+        f.close()
 
     def __getitem__(self, index):
         return self.data[index], self.label[index]
@@ -126,10 +132,11 @@ for step, data in enumerate(test_loader):
     if use_cuda:
         vec = vec.cuda()
         label = label.cuda()
+    print(vec)
     output = cnn(vec)
     print(output)
     output = output - label
-    print(output)
+    #print(output)
     #right_neg += output[(output >= 0) & (output <= 0.5)].size(0)
     #total_neg += label[(label <= 0.5)].size(0)
     #right_pos += output[(output >= -0.5) & (output <= 0)].size(0)
