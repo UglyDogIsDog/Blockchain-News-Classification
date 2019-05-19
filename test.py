@@ -7,7 +7,7 @@ import json
 import bert_encoder
 
 # Hyper Parameters
-EPOCH = 300
+EPOCH = 100
 BATCH_SIZE = 50
 LR = 1e-4
 
@@ -125,5 +125,8 @@ for step, data in enumerate(test_loader):
     total += label.size(0)
 
 print('Accuracy:%.3f' % (float(right) / float(total)))
+print(right, " ", total)
 print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
+print(right_neg, " ", total_neg)
 print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
+print(right_pos, " ", total_pos)
