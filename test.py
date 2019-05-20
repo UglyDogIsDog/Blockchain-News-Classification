@@ -9,6 +9,7 @@ import bert_encoder
 import os
 import random
 import sys
+import model
 
 # Hyper Parameters
 if len(sys.argv) == 1:
@@ -42,7 +43,7 @@ class CustomDataset(Dataset):
         for passage in passages:
             print(len(passage["passage"]))
             while len(passage["passage"]) > 128: #abandon too short section
-                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:512])).squeeze(0).transpose(0, 1))
+                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:512])).squeeze(0))#.transpose(0, 1))
                 if passage["label"] == 1:
                     self.label.append(1)
                     pos_num += 1
@@ -128,8 +129,11 @@ class CNN(nn.Module):
         out = self.fc(out)
         return out
 
-cnn = CNN(768, 2) #bert output a vector of 768 for every word, 
+#cnn = CNN(768, 2) #bert output a vector of 768 for every word, 
                   #and the output mental analysis is binary classification
+
+cnn = model.CNN_Text()
+
 if use_cuda:
     cnn = cnn.cuda()
 optimizer = torch.optim.Adam(cnn.parameters(),lr = LR)
