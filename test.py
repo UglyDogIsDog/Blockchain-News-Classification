@@ -13,13 +13,13 @@ import sys
 import model
 
 # Hyper Parameters
-if len(sys.argv) == 1:
-    print("Error: input epoch first")
+if len(sys.argv) <= 2:
+    print("Error: input batch size, LR first")
     sys.exit()
 
-EPOCH = int(sys.argv[1])
-BATCH_SIZE = 64
-LR = 1e-1
+EPOCH = 100
+BATCH_SIZE = int(sys.argv[2])
+LR = float(sys.argv[2])
 
 use_cuda = False
 if torch.cuda.is_available():
