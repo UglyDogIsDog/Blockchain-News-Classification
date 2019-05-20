@@ -172,12 +172,14 @@ def test():
     print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
     #print(right, " ", total)
     print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
-    print(right_neg, " ", total_neg)
+    #print(right_neg, " ", total_neg)
     print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-    print(right_pos, " ", total_pos)
+    #print(right_pos, " ", total_pos)
 
 #train
 for epoch in range(EPOCH):
+    if epoch % 5 == 0:
+        test()
     for step, data in enumerate(train_loader):
         vec, label = data
         if use_cuda:
@@ -198,10 +200,5 @@ for epoch in range(EPOCH):
             #output = output - label #count right answer
             #accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
             print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
-
-    if epoch % 5 == 0:
-        test()
-
-
 
 test()
