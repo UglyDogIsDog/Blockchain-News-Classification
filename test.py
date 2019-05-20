@@ -18,8 +18,8 @@ if len(sys.argv) == 1:
     sys.exit()
 
 EPOCH = int(sys.argv[1])
-BATCH_SIZE = 50
-LR = 1e-3
+BATCH_SIZE = 64
+LR = 1e-1
 
 use_cuda = False
 if torch.cuda.is_available():
@@ -192,7 +192,7 @@ for epoch in range(EPOCH):
         optimizer.step()
 
         #output process every 100 batch
-        if step % 10 == 0:
+        if step % 100 == 0:
             pred = torch.max(output, 1)[1]
             accuracy = float(label[pred == label].size(0)) / float(label.size(0))
             #output = output - label #count right answer
