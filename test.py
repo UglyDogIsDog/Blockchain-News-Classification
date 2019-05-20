@@ -18,7 +18,7 @@ if len(sys.argv) <= 2:
     sys.exit()
 
 EPOCH = 100
-BATCH_SIZE = int(sys.argv[2])
+BATCH_SIZE = int(sys.argv[1])
 LR = float(sys.argv[2])
 
 use_cuda = False
