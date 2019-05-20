@@ -5,6 +5,8 @@ from bert import modeling
 import tensorflow as tf
 from bert import tokenization
 
+SEN_LEN = 128
+
 flags = tf.flags
 FLAGS = flags.FLAGS
 
@@ -22,7 +24,7 @@ flags.DEFINE_bool(
     "Whether to lower case the input text."
 )
 flags.DEFINE_integer(
-    "max_seq_length", 512,
+    "max_seq_length", SEN_LEN,
     "The maximum total input sequence length after WordPiece tokenization."
 )
 

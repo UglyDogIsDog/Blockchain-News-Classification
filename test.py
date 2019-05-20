@@ -6,6 +6,7 @@ from torch.utils.data.dataset import Dataset
 import torchvision
 import json
 import bert_encoder
+from bert_encoder import SEN_LEN
 import os
 import random
 import sys
@@ -42,8 +43,8 @@ class CustomDataset(Dataset):
         neg_index = []
         for passage in passages:
             print(len(passage["passage"]))
-            while len(passage["passage"]) > 128: #abandon too short section
-                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:512])).squeeze(0))#.transpose(0, 1))
+            while len(passage["passage"]) > (SEN_LEN / 4): #abandon too short section
+                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:SEN_LEN])).squeeze(0))#.transpose(0, 1))
                 if passage["label"] == 1:
                     self.label.append(1)
                     pos_num += 1
@@ -53,7 +54,7 @@ class CustomDataset(Dataset):
                     neg_num += 1
                     neg_index.append(num)
                 num += 1
-                passage["passage"] = passage["passage"][512:]
+                passage["passage"] = passage["passage"][SEN_LEN:]
         inp.close()
 
         while pos_num < neg_num:
@@ -91,7 +92,7 @@ train_loader = Data.DataLoader(dataset = CustomDataset("train.json"), batch_size
 test_loader = Data.DataLoader(dataset = CustomDataset("test.json"), batch_size = BATCH_SIZE, shuffle = True)
 
 #model
-class CNN(nn.Module):
+'''class CNN(nn.Module):
     def __init__(self, input_size , out_class):
         super(CNN, self).__init__()
         self.conv = nn.Sequential(
@@ -128,7 +129,7 @@ class CNN(nn.Module):
         out = out.view(out.size(0), -1) #unfold
         out = self.fc(out)
         return out
-
+'''
 #cnn = CNN(768, 2) #bert output a vector of 768 for every word, 
                   #and the output mental analysis is binary classification
 
