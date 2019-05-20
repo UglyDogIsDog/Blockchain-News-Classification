@@ -28,6 +28,7 @@ class CNN_Text(nn.Module):
         '''
         self.dropout = nn.Dropout(Dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, C)
+        self.act = nn.Sigmoid()
 
     def conv_and_pool(self, x, conv):
         x = F.relu(conv(x)).squeeze(3)  # (N, Co, W)
@@ -55,5 +56,6 @@ class CNN_Text(nn.Module):
         x = torch.cat((x1, x2, x3), 1) # (N,len(Ks)*Co)
         '''
         x = self.dropout(x)  # (N, len(Ks)*Co)
-        logit = self.fc1(x)  # (N, C)
-        return logit
+        res = self.fc1(x)  # (N, C)
+        #res = self.act(res)
+        return res

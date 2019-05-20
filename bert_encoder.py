@@ -5,7 +5,7 @@ from bert import modeling
 import tensorflow as tf
 from bert import tokenization
 
-SEN_LEN = 128
+SEN_LEN = 32
 
 flags = tf.flags
 FLAGS = flags.FLAGS

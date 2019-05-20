@@ -194,7 +194,7 @@ for epoch in range(EPOCH):
         optimizer.step()
 
         #output process every 100 batch
-        if step % 100 == 0:
+        if step % 1000 == 0:
             pred = torch.max(output, 1)[1]
             accuracy = float(label[pred == label].size(0)) / float(label.size(0))
             #output = output - label #count right answer
