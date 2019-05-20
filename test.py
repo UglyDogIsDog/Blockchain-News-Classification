@@ -19,7 +19,7 @@ if len(sys.argv) == 1:
 
 EPOCH = int(sys.argv[1])
 BATCH_SIZE = 50
-LR = 1e-4
+LR = 1e-3
 
 use_cuda = False
 if torch.cuda.is_available():
@@ -43,7 +43,7 @@ class CustomDataset(Dataset):
         neg_index = []
         for passage in passages:
             print(len(passage["passage"]))
-            while len(passage["passage"]) > (SEN_LEN / 4): #abandon too short section
+            while len(passage["passage"]) > (SEN_LEN / 2): #abandon too short section
                 self.data.append(torch.FloatTensor(be.encode(passage["passage"][:SEN_LEN])).squeeze(0))#.transpose(0, 1))
                 if passage["label"] == 1:
                     self.label.append(1)
@@ -57,6 +57,7 @@ class CustomDataset(Dataset):
                 passage["passage"] = passage["passage"][SEN_LEN:]
         inp.close()
 
+        '''
         while pos_num < neg_num:
             self.data.pop(neg_index[neg_num - 1])
             self.label.pop(neg_index[neg_num - 1])
@@ -66,18 +67,19 @@ class CustomDataset(Dataset):
             self.data.pop(pos_index[pos_num - 1])
             self.label.pop(pos_index[pos_num - 1])
             pos_num -= 1
-
         '''
+
+        
         while pos_num < neg_num:
             self.data.append(self.data[pos_index[random.randint(0, len(pos_index) - 1)]].clone())
-            self.label.append(torch.FloatTensor([1]))
+            self.label.append(1)
             pos_num += 1
 
         while pos_num > neg_num:
             self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
-            self.label.append(torch.FloatTensor([0]))
+            self.label.append(0)
             neg_num += 1
-        '''
+        
         
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
@@ -156,7 +158,7 @@ for epoch in range(EPOCH):
         optimizer.step()
 
         #output process every 100 batch
-        if step % 100 == 0:
+        if step % 10 == 0:
             pred = torch.max(output, 1)[1]
             accuracy = float(label[pred == label].size(0)) / float(label.size(0))
             #output = output - label #count right answer
