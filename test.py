@@ -142,6 +142,40 @@ if use_cuda:
 optimizer = torch.optim.Adam(cnn.parameters(),lr = LR)
 loss_func = nn.CrossEntropyLoss() #nn.BCELoss() #for float
 
+#test
+def test():
+    right, total = 0, 0
+    right_neg, total_neg = 0, 0
+    right_pos, total_pos = 0, 0
+    for step, data in enumerate(test_loader):
+        vec, label = data
+        if use_cuda:
+            vec = vec.cuda()
+            label = label.cuda()
+        #print(vec)
+        output = cnn(vec)
+        label = label.to(dtype=torch.int64)
+        #print(output)
+        #output = output - label
+        #print(output)
+        pred = torch.max(output, 1)[1]
+        #accuracy = float(label[pred == label].size(0)) / float(label.size(0))
+        #accuracy_pos = float(label[(pred == label) & (label == 1)].size(0)) / float(label[label == 1].size(0))
+        #accuracy_neg = float(label[(pred == label) & (label == 0)].size(0)) / float(label[label == 0].size(0))
+        right_neg += label[(pred == label) & (label == 0)].size(0)
+        total_neg += label[label == 1].size(0)
+        right_pos += label[(pred == label) & (label == 1)].size(0)
+        total_pos += label[label == 0].size(0)
+        right += label[pred == label].size(0)
+        total += label.size(0)
+
+    print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
+    #print(right, " ", total)
+    print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
+    print(right_neg, " ", total_neg)
+    print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
+    print(right_pos, " ", total_pos)
+
 #train
 for epoch in range(EPOCH):
     for step, data in enumerate(train_loader):
@@ -165,35 +199,9 @@ for epoch in range(EPOCH):
             #accuracy = float(output[((output >= -0.5) & (output <= 0.5))].size(0)) / float(label.size(0))
             print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
 
-#test
-right, total = 0, 0
-right_neg, total_neg = 0, 0
-right_pos, total_pos = 0, 0
-for step, data in enumerate(test_loader):
-    vec, label = data
-    if use_cuda:
-        vec = vec.cuda()
-        label = label.cuda()
-    #print(vec)
-    output = cnn(vec)
-    label = label.to(dtype=torch.int64)
-    #print(output)
-    #output = output - label
-    #print(output)
-    pred = torch.max(output, 1)[1]
-    #accuracy = float(label[pred == label].size(0)) / float(label.size(0))
-    #accuracy_pos = float(label[(pred == label) & (label == 1)].size(0)) / float(label[label == 1].size(0))
-    #accuracy_neg = float(label[(pred == label) & (label == 0)].size(0)) / float(label[label == 0].size(0))
-    right_neg += label[(pred == label) & (label == 0)].size(0)
-    total_neg += label[label == 1].size(0)
-    right_pos += label[(pred == label) & (label == 1)].size(0)
-    total_pos += label[label == 0].size(0)
-    right += label[pred == label].size(0)
-    total += label.size(0)
+    if epoch % 5 == 0:
+        test()
 
-print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
-#print(right, " ", total)
-print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
-print(right_neg, " ", total_neg)
-print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
-print(right_pos, " ", total_pos)
+
+
+test()
