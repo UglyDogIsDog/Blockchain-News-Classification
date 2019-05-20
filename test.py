@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.utils.data as Data
 import torch.nn.functional as F
 from torch.utils.data.dataset import Dataset
-import torchvision
+#import torchvision
 import json
 import bert_encoder
 from bert_encoder import SEN_LEN
