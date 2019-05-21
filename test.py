@@ -37,11 +37,11 @@ class CustomDataset(Dataset):
 
         inp = open(path, "rb")
         passages = json.load(inp)
-        #self.data = []
+        self.data = []
         self.label = []
         #be = bert_encoder.BertEncoder()
-        be = BertClient() #(ip='192.168.120.125')
-        pos_num, neg_num, num = 0, 0, 0
+        be = BertClient(ip='192.168.120.125')
+        pos_num, neg_num, num, last_num = 0, 0, 0, 0
         pos_index = []
         neg_index = []
         sens_all = []
@@ -66,7 +66,22 @@ class CustomDataset(Dataset):
             num += len(sens)
             #passage["passage"] = passage["passage"][SEN_LEN:]
 
-        self.data = np.array(be.encode(sens_all))
+            if num - last_num > 5000:
+                if last_num == 0: #first time
+                    self.data = np.array(be.encode(sens_all))
+                    
+                else:
+                    
+                    self.data = np.concatenate((self.data, np.array(be.encode(sens_all))), axis = 0)
+                    
+                last_num = num
+                sens_all = []
+
+        if len(sens_all) > 0:
+            if last_num == 0: #first time
+                self.data = np.array(be.encode(sens_all))
+            else:
+                self.data = np.concatenate((self.data, np.array(be.encode(sens_all))), axis = 0)
         inp.close()
 
         '''
@@ -80,7 +95,7 @@ class CustomDataset(Dataset):
             self.label.pop(pos_index[pos_num - 1])
             pos_num -= 1
         '''
-        
+        #balance the data
         while pos_num < neg_num:
             self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
             self.label.append(1)
@@ -180,7 +195,7 @@ def test():
         right += label[pred == label].size(0)
         total += label.size(0)
 
-    print('Accuracy:%.3f' % (float(right_neg + right_pos) / float(total_neg + total_pos)))
+    print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
     #print(right, " ", total)
     print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
     #print(right_neg, " ", total_neg)
