@@ -40,7 +40,7 @@ class CustomDataset(Dataset):
         self.data = []
         self.label = []
         #be = bert_encoder.BertEncoder()
-        be = BertClient(ip='192.168.120.125')
+        be = BertClient() #(ip='192.168.120.125')
         pos_num, neg_num, num, last_num = 0, 0, 0, 0
         pos_index = []
         neg_index = []
