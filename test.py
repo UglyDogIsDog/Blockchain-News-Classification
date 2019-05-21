@@ -11,6 +11,8 @@ import os
 import random
 import sys
 import model
+from bert_serving.client import BertClient
+import numpy as np
 
 # Hyper Parameters
 if len(sys.argv) <= 2:
@@ -35,26 +37,36 @@ class CustomDataset(Dataset):
 
         inp = open(path, "rb")
         passages = json.load(inp)
-        self.data = []
+        #self.data = []
         self.label = []
-        be = bert_encoder.BertEncoder()
+        #be = bert_encoder.BertEncoder()
+        be = BertClient() #(ip='192.168.120.125')
         pos_num, neg_num, num = 0, 0, 0
         pos_index = []
         neg_index = []
+        sens_all = []
         for passage in passages:
-            print(len(passage["passage"]))
-            while len(passage["passage"]) > (SEN_LEN / 2): #abandon too short section
-                self.data.append(torch.FloatTensor(be.encode(passage["passage"][:SEN_LEN])).squeeze(0))#.transpose(0, 1))
-                if passage["label"] == 1:
-                    self.label.append(1)
-                    pos_num += 1
-                    pos_index.append(num)
-                else:
-                    self.label.append(0)
-                    neg_num += 1
-                    neg_index.append(num)
-                num += 1
-                passage["passage"] = passage["passage"][SEN_LEN:]
+            sens = [passage["passage"][i: i + SEN_LEN - 2] for i in range(0, len(passage["passage"]), SEN_LEN - 2)]
+            sens_all += sens
+            print(len(sens))
+            #while len(passage["passage"]) > (SEN_LEN / 2): #abandon too short section
+            '''if len(self.data) == 0:
+                self.data = np.array(be.encode(sens))
+            else:
+                self.data = np.concatenate((self.data, np.array(be.encode(sens))))#.transpose(0, 1))'''
+
+            if passage["label"] == 1:
+                self.label += [1] * len(sens)
+                pos_num += len(sens)
+                pos_index += [i for i in range(num, num + len(sens))]
+            else:
+                self.label += [0] * len(sens)
+                neg_num += len(sens)
+                neg_index += [i for i in range(num, num + len(sens))]
+            num += len(sens)
+            #passage["passage"] = passage["passage"][SEN_LEN:]
+
+        self.data = np.array(be.encode(sens_all))
         inp.close()
 
         '''
@@ -68,18 +80,17 @@ class CustomDataset(Dataset):
             self.label.pop(pos_index[pos_num - 1])
             pos_num -= 1
         '''
-
         
         while pos_num < neg_num:
-            self.data.append(self.data[pos_index[random.randint(0, len(pos_index) - 1)]].clone())
+            self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
             self.label.append(1)
             pos_num += 1
 
         while pos_num > neg_num:
-            self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
+            self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
+            #self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
             self.label.append(0)
             neg_num += 1
-        
         
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
@@ -88,7 +99,7 @@ class CustomDataset(Dataset):
         return self.data[index], self.label[index]
 
     def __len__(self):
-        return len(self.data)
+        return self.data.shape[0]
 
 train_loader = Data.DataLoader(dataset = CustomDataset("train.json"), batch_size = BATCH_SIZE, shuffle = True)
 test_loader = Data.DataLoader(dataset = CustomDataset("test.json"), batch_size = BATCH_SIZE, shuffle = True)
