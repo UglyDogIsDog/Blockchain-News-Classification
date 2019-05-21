@@ -20,6 +20,7 @@ if len(sys.argv) <= 2:
     sys.exit()
 
 EPOCH = 100
+CLIENT_BATCH_SIZE = 4096
 BATCH_SIZE = int(sys.argv[1])
 LR = float(sys.argv[2])
 
@@ -37,51 +38,36 @@ class CustomDataset(Dataset):
 
         inp = open(path, "rb")
         passages = json.load(inp)
-        self.data = []
         self.label = []
         #be = bert_encoder.BertEncoder()
         be = BertClient() #(ip='192.168.120.125')
-        pos_num, neg_num, num, last_num = 0, 0, 0, 0
+        
+        pos_num, neg_num = 0, 0
         pos_index = []
         neg_index = []
-        sens_all = []
+        sens = []
         for passage in passages:
-            sens = [passage["passage"][i: i + SEN_LEN - 2] for i in range(0, len(passage["passage"]), SEN_LEN - 2)]
-            sens_all += sens
-            print(len(sens))
-            #while len(passage["passage"]) > (SEN_LEN / 2): #abandon too short section
-            '''if len(self.data) == 0:
-                self.data = np.array(be.encode(sens))
-            else:
-                self.data = np.concatenate((self.data, np.array(be.encode(sens))))#.transpose(0, 1))'''
-
+            pass_sen = [passage["passage"][i: i + SEN_LEN - 2] for i in range(0, len(passage["passage"]), SEN_LEN - 2)]
             if passage["label"] == 1:
-                self.label += [1] * len(sens)
-                pos_num += len(sens)
-                pos_index += [i for i in range(num, num + len(sens))]
+                self.label += [1] * len(pass_sen)
+                pos_num += len(pass_sen)
+                pos_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
             else:
-                self.label += [0] * len(sens)
-                neg_num += len(sens)
-                neg_index += [i for i in range(num, num + len(sens))]
-            num += len(sens)
-            #passage["passage"] = passage["passage"][SEN_LEN:]
+                self.label += [0] * len(pass_sen)
+                neg_num += len(pass_sen)
+                neg_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
+            sens += pass_sen
+            
 
-            if num - last_num > 5000:
-                if last_num == 0: #first time
-                    self.data = np.array(be.encode(sens_all))
-                    
-                else:
-                    
-                    self.data = np.concatenate((self.data, np.array(be.encode(sens_all))), axis = 0)
-                    
-                last_num = num
-                sens_all = []
+        self.data = np.empty((len(sens) + abs(pos_num - neg_num), SEN_LEN, 768), dtype=np.float32)
 
-        if len(sens_all) > 0:
-            if last_num == 0: #first time
-                self.data = np.array(be.encode(sens_all))
-            else:
-                self.data = np.concatenate((self.data, np.array(be.encode(sens_all))), axis = 0)
+        last_num = 0
+        while len(sens) > last_num:
+            start = last_num
+            end = min(last_num + CLIENT_BATCH_SIZE, len(sens))
+            self.data[start : end] = be.encode(sens[start : end])
+            last_num = end
+        
         inp.close()
 
         '''
@@ -96,18 +82,23 @@ class CustomDataset(Dataset):
             pos_num -= 1
         '''
         #balance the data
+        
         while pos_num < neg_num:
-            self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
+            self.data[last_num] = np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]])
+            #self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
             self.label.append(1)
             pos_num += 1
+            last_num += 1
 
         while pos_num > neg_num:
-            self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
+            self.data[last_num] = np.copy(self.data[neg_index[random.randint(0, len(neg_index) - 1)]])
+            #self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
             #self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
             self.label.append(0)
             neg_num += 1
+            last_num += 1
         
-        torch.save(self.data, path + ".dat")
+        torch.save(torch.FloatTensor(self.data), path + ".dat")
         torch.save(self.label, path + ".lab")
 
     def __getitem__(self, index):
@@ -175,6 +166,7 @@ def test():
     right_pos, total_pos = 0, 0
     for step, data in enumerate(test_loader):
         vec, label = data
+        #vec = torch.FloatTensor(vec)
         if use_cuda:
             vec = vec.cuda()
             label = label.cuda()
@@ -189,17 +181,17 @@ def test():
         #accuracy_pos = float(label[(pred == label) & (label == 1)].size(0)) / float(label[label == 1].size(0))
         #accuracy_neg = float(label[(pred == label) & (label == 0)].size(0)) / float(label[label == 0].size(0))
         right_neg += label[(pred == label) & (label == 0)].size(0)
-        total_neg += label[label == 1].size(0)
+        total_neg += label[label == 0].size(0)
         right_pos += label[(pred == label) & (label == 1)].size(0)
-        total_pos += label[label == 0].size(0)
+        total_pos += label[label == 1].size(0)
         right += label[pred == label].size(0)
         total += label.size(0)
 
     print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
     #print(right, " ", total)
-    print('Negative accuracy:%.3f' % (float(right_neg) / float(total_neg)))
+    print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
     #print(right_neg, " ", total_neg)
-    print('Positive accuracy:%.3f' % (float(right_pos) / float(total_pos)))
+    print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
     #print(right_pos, " ", total_pos)
 
 #train
