@@ -28,7 +28,7 @@ class CustomDataset(Dataset):
             self.label = torch.load(path + ".lab")
             return
 
-        be = BertClient(ip='192.168.120.125')
+        be = BertClient()
         
         #read data
         inp = open(path, "rb")
