@@ -1,9 +1,6 @@
-import json
-import os
 import sys
-import numpy as np
+import getopt
 import torch
-import torch.nn as nn
 import torch.utils.data as Data
 import torch.nn.functional as F
 
@@ -12,13 +9,17 @@ from model import CNN_Text, test
 
 if __name__ == "__main__":  
     # Hyper Parameters
-    if len(sys.argv) <= 2:
-        print("Error: input batch size, LR first")
-        sys.exit()
-
-    EPOCH = 100
-    BATCH_SIZE = int(sys.argv[1])
-    LR = float(sys.argv[2])
+    EPOCH = 20
+    BATCH_SIZE = 32
+    LR = 1e-3
+    opts, args = getopt.getopt(sys.argv[1:],'-b:-l:-e:', ['batch_size=', 'learning_rate=', 'epoch='])
+    for opt_name, opt_value in opts:
+        if opt_name in ('-b', '--batch_size'):
+            BATCH_SIZE = int(opt_value)
+        if opt_name in ('-l', '--learning_rate'):
+            LR = float(opt_value)
+        if opt_name in ('-e','--epoch'):
+            EPOCH = int(opt_value)
 
     #use CUDA to speed up
     use_cuda = torch.cuda.is_available()
