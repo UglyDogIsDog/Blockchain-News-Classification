@@ -8,8 +8,7 @@ from torch.utils.data.dataset import Dataset
 from bert_serving.client import BertClient
 
 CLIENT_BATCH_SIZE = 4096
-SEN_NUM = 32
-SEN_LEN = 32
+SEN_NUM = 64
 
 #cut paragraph to sentences
 def cut_para(para):
@@ -41,7 +40,7 @@ class CustomDataset(Dataset):
         for passage in passages:
             pass_sen = cut_para(passage["passage"])
             if len(pass_sen) < SEN_NUM:
-                pass_sen += ["x"] * (SEN_LEN - len(pass_sen))
+                pass_sen += ["x"] * (SEN_NUM - len(pass_sen))
             pass_sen = pass_sen[0: SEN_NUM]
             sens += pass_sen
             
@@ -57,7 +56,7 @@ class CustomDataset(Dataset):
             
         #send sentences to BERT-as-service, get each sentences' vector of size 768
         if balance:
-            self.data = np.empty((len(sens) + abs(neg_num - pos_num) * SEN_LEN, 768), dtype=np.float32)
+            self.data = np.empty((len(sens) + abs(neg_num - pos_num) * SEN_NUM, 768), dtype=np.float32)
         else:
             self.data = np.empty((len(sens), 768), dtype=np.float32)
         last_num = 0
@@ -71,7 +70,7 @@ class CustomDataset(Dataset):
         self.data = np.resize(self.data, ((len(self.data) // SEN_NUM), SEN_NUM, 768))
         
         #balance the data
-        last_num = last_num // SEN_LEN
+        last_num = last_num // SEN_NUM
         if balance:
             while pos_num < neg_num:
                 self.data[last_num] = np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]])
