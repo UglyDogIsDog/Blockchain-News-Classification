@@ -40,7 +40,6 @@ class CustomDataset(Dataset):
         neg_index = []
         for passage in passages:
             pass_sen = cut_para(passage["passage"])
-            print(len(pass_sen))
             if len(pass_sen) < SEN_NUM:
                 pass_sen += ["x"] * (SEN_LEN - len(pass_sen))
             pass_sen = pass_sen[0: SEN_NUM]
