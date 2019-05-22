@@ -14,7 +14,10 @@ for passage in passages:
             neg_count += 1
         if passage['label'] == 1:
             pos_count += 1
-        l.append(passage)
+        p = {}
+        p['passage'] = passage['passage']
+        p['label'] = passage['label']
+        l.append(p)
 
 random.shuffle(l)
 
