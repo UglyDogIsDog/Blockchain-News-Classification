@@ -1,3 +1,5 @@
+
+
 import torch
 import torch.nn as nn
 import torch.utils.data as Data
@@ -13,6 +15,7 @@ import sys
 import model
 from bert_serving.client import BertClient
 import numpy as np
+import re
 
 # Hyper Parameters
 if len(sys.argv) <= 2:
@@ -23,10 +26,24 @@ EPOCH = 100
 CLIENT_BATCH_SIZE = 4096
 BATCH_SIZE = int(sys.argv[1])
 LR = float(sys.argv[2])
+SEN_NUM = 32
 
 use_cuda = False
 if torch.cuda.is_available():
     use_cuda = True
+
+
+
+def cut_para(para):
+    para = re.sub('([。！？\?])([^”’])', r"\1\n\2", para)  # 单字符断句符
+    para = re.sub('(\.{6})([^”’])', r"\1\n\2", para)  # 英文省略号
+    para = re.sub('(\…{2})([^”’])', r"\1\n\2", para)  # 中文省略号
+    para = re.sub('([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
+    # 如果双引号前有终止符，那么双引号才是句子的终点，把分句符\n放到双引号后，注意前面的几句都小心保留了双引号
+    para = para.rstrip()  # 段尾如果有多余的\n就去掉它
+    # 很多规则中会考虑分号;，但是这里我把它忽略不计，破折号、英文双引号等同样忽略，需要的再做些简单调整即可。
+    return para.split("\n")
+
 
 #customized loading data
 class CustomDataset(Dataset):
@@ -40,26 +57,32 @@ class CustomDataset(Dataset):
         passages = json.load(inp)
         self.label = []
         #be = bert_encoder.BertEncoder()
-        be = BertClient() #(ip='192.168.120.125')
+        be = BertClient(ip='192.168.120.125')
         
         pos_num, neg_num = 0, 0
         pos_index = []
         neg_index = []
         sens = []
         for passage in passages:
-            pass_sen = [passage["passage"][i: i + SEN_LEN - 2] for i in range(0, len(passage["passage"]), SEN_LEN - 2)]
+            pass_sen = cut_para(passage["passage"])
+            print(len(pass_sen))
+            if len(pass_sen) < SEN_NUM:
+                pass_sen += ["x"] * (SEN_LEN - len(pass_sen))
+            sens += pass_sen[0: SEN_NUM]
+            #pass_sen = [passage["passage"][i: i + SEN_LEN - 2] for i in range(0, len(passage["passage"]), SEN_LEN - 2)]
+            
             if passage["label"] == 1:
-                self.label += [1] * len(pass_sen)
-                pos_num += len(pass_sen)
-                pos_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
+                self.label += [1]
+                #pos_num += len(pass_sen)
+                #pos_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
             else:
-                self.label += [0] * len(pass_sen)
-                neg_num += len(pass_sen)
-                neg_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
-            sens += pass_sen
+                self.label += [0]
+                #neg_num += len(pass_sen)
+                #neg_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
+            #sens += pass_sen
             
 
-        self.data = np.empty((len(sens) + abs(pos_num - neg_num), SEN_LEN, 768), dtype=np.float32)
+        self.data = np.empty((len(sens), 768), dtype=np.float32)
 
         last_num = 0
         while len(sens) > last_num:
@@ -69,6 +92,7 @@ class CustomDataset(Dataset):
             last_num = end
         
         inp.close()
+        self.data = np.resize(self.data, ((len(self.data) // SEN_NUM), SEN_NUM, 768))
 
         '''
         while pos_num < neg_num:
@@ -82,7 +106,7 @@ class CustomDataset(Dataset):
             pos_num -= 1
         '''
         #balance the data
-        
+        '''
         while pos_num < neg_num:
             self.data[last_num] = np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]])
             #self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
@@ -97,7 +121,7 @@ class CustomDataset(Dataset):
             self.label.append(0)
             neg_num += 1
             last_num += 1
-        
+        '''
         torch.save(torch.FloatTensor(self.data), path + ".dat")
         torch.save(self.label, path + ".lab")
 
