@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-
 class CNN_Text(nn.Module):
     
     def __init__(self):
@@ -28,6 +27,30 @@ class CNN_Text(nn.Module):
         res = self.fc1(x)  # (N, C)
         #res = self.act(res)
         return res
+
+#test
+def test(cnn, test_loader, use_cuda):
+    right, total = 0, 0
+    right_neg, total_neg = 0, 0
+    right_pos, total_pos = 0, 0
+    for step, data in enumerate(test_loader):
+        vec, label = data
+        if use_cuda:
+            vec = vec.cuda()
+            label = label.cuda()
+        output = cnn(vec)
+        label = label.to(dtype=torch.int64)
+        
+        pred = torch.max(output, 1)[1]
+        right_neg += label[(pred == label) & (label == 0)].size(0)
+        total_neg += label[label == 0].size(0)
+        right_pos += label[(pred == label) & (label == 1)].size(0)
+        total_pos += label[label == 1].size(0)
+        right += label[pred == label].size(0)
+        total += label.size(0)
+    print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
+    print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
+    print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
 
 
 #model
