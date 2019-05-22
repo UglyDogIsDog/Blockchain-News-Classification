@@ -28,3 +28,44 @@ class CNN_Text(nn.Module):
         res = self.fc1(x)  # (N, C)
         #res = self.act(res)
         return res
+
+
+#model
+'''class CNN(nn.Module):
+    def __init__(self, input_size , out_class):
+        super(CNN, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv1d(input_size, 64, 5, padding=2),
+            nn.ReLU(),
+            nn.Dropout(),
+            nn.Conv1d(64, 32, 5, padding=2),
+            nn.ReLU(),
+            nn.Dropout(),
+            nn.Conv1d(32, 16, 5, padding=2),
+            nn.ReLU()
+        )
+        #pool_layer
+        self.pool = nn.Sequential(
+           nn.MaxPool1d(4,stride = 2,padding = 2)
+        )
+        # fully connected layers
+        self.fc = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(512 * 9, 512),
+        	nn.ReLU(),
+        	nn.Dropout(),
+        	nn.Linear(512, out_class),
+            #nn.Sigmoid()
+        )
+    def forward(self, x):
+        out = self.conv(x)
+        #池化层
+        out = out.permute(0,2,1)
+        out = self.pool(out)
+        out = out.permute(0,2,1)
+        out = out.contiguous()
+        
+        out = out.view(out.size(0), -1) #unfold
+        out = self.fc(out)
+        return out
+'''
