@@ -50,14 +50,10 @@ class CustomDataset(Dataset):
                 pos_num += 1
                 pos_index += [len(self.label)]
                 self.label += [1]
-                #pos_num += len(pass_sen)
-                #pos_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
             else:
                 neg_num += 1
                 neg_index += [len(self.label)]
                 self.label += [0]
-                #neg_num += len(pass_sen)
-                #neg_index += [i for i in range(len(sens), len(sens) + len(pass_sen))]
         inp.close()
             
         #send sentences to BERT-as-service, get each sentences' vector of size 768
@@ -80,15 +76,12 @@ class CustomDataset(Dataset):
         if balance:
             while pos_num < neg_num:
                 self.data[last_num] = np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]])
-                #self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
                 self.label.append(1)
                 pos_num += 1
                 last_num += 1
 
             while pos_num > neg_num:
                 self.data[last_num] = np.copy(self.data[neg_index[random.randint(0, len(neg_index) - 1)]])
-                #self.data = np.append(self.data, np.expand_dims(np.copy(self.data[pos_index[random.randint(0, len(pos_index) - 1)]]), 0), axis = 0)
-                #self.data.append(self.data[neg_index[random.randint(0, len(neg_index) - 1)]].clone())
                 self.label.append(0)
                 neg_num += 1
                 last_num += 1
