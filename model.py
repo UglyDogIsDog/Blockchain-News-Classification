@@ -3,28 +3,37 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
+#output = torch.randn(100,128,768)#测试用例
+import sys
+import getopt
+import torch
+import torch.utils.data as Data
+import torch.nn.functional as F
 class CNN_Text(nn.Module):
-    
+    #print('0:'+ str(vec.shape))
     def __init__(self):
         super(CNN_Text, self).__init__()
         Co = 100 # number of kernel
         Ks = [3, 4, 5] # size of kernels, number of features
         Dropout = 0.5
 
-        self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
+        self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768//4),stride = (K,768//4)) for K in Ks])
         self.dropout = nn.Dropout(Dropout)
         self.fc1 = nn.Linear(len(Ks)*Co, 2)
         #self.act = nn.Sigmoid()
 
     def forward(self, x):
         x = x.unsqueeze(1)  # (N, Ci, W, D)
-        #print(x.shape)
-        x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]  # [(N, Co, W+-), ...]*len(Ks)
+       
+        x = [F.relu(conv(x)) for conv in self.convs1]  # [(N, Co, W+-), ...]*len(Ks)
         x = [self.dropout(i) for i in x]
-        x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
+        
+        x = [F.max_pool2d(i, (i.size(2),i.size(3))).squeeze(3).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
+        
         x = torch.cat(x, 1)
         x = self.dropout(x)  # (N, len(Ks)*Co)
         res = self.fc1(x)  # (N, C)
+        print(x.shape)
         #res = self.act(res)
         return res
 
