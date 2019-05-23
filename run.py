@@ -42,6 +42,7 @@ if __name__ == "__main__":
             vec, label = data
             if use_cuda:
                 vec = vec.cuda()
+                print(vec.shape)
                 label = label.cuda()
             output = cnn(vec)
             label = label.to(dtype=torch.int64)
