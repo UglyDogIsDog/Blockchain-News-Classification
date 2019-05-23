@@ -20,7 +20,7 @@ class CNN_Text(nn.Module):
     def __init__(self):
         super(CNN_Text, self).__init__()
         Co = 100 # number of kernel
-        Ks = [5, 10, 15] # size of kernels, number of features
+        Ks = [3, 4, 5] # size of kernels, number of features
         Dropout = 0.5
 
         #self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
