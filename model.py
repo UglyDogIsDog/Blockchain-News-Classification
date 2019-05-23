@@ -40,7 +40,7 @@ class CNN_Text(nn.Module):
         x = [F.relu(self.conv2(i)) for i in x]
         x = [self.dropout(i) for i in x]
         
-        x = [F.max_pool1d(i,i.shape[2]) for i in ]
+        x = [F.max_pool1d(i,i.shape[2]) for i in x]
       
         x = torch.cat(x, 1).squeeze(2)
         
