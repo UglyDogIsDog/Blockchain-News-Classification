@@ -10,37 +10,44 @@ import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
 #output = torch.randn(100,128,768)#测试用例
+#output = torch.randn(100,128,768)#测试用例
+import sys
+import getopt
+import torch
+import torch.utils.data as Data
+import torch.nn.functional as F
 class CNN_Text(nn.Module):
     def __init__(self):
         super(CNN_Text, self).__init__()
         Co = 100 # number of kernel
-        Ks = [3, 4, 5] # size of kernels, number of features
+        Ks = [5, 10, 15] # size of kernels, number of features
         Dropout = 0.5
-        self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768//4),stride = (K,768//4)) for K in Ks])
-        self.convs2 = nn.ModuleList([nn.Conv1d((64//K)//2,1,5,stride = 5) for K in Ks])
+
+        #self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
+        self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
+        self.conv2 = nn.Conv1d(100,50,5,stride = 2)
+        self.conv3 = nn.Conv1d(50,25,5)#in_channels,out_channels,kernel_size
         self.dropout = nn.Dropout(Dropout)
-        self.fc1 = nn.Linear(len(Ks)*Co//5, 2)
-        
+        self.fc1 = nn.Linear(len(Ks)*Co//2, 2)
+        #self.act = nn.Sigmoid()
 
     def forward(self, x):
         x = x.unsqueeze(1)  # (N, Ci, W, D)
-        x = [F.relu(conv(x)) for conv in self.convs1]  # [(N, Co, W+-), ...]*len(Ks)
+        x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]  # [(N, Co, W+-), ...]*len(Ks)
+        x = [self.dropout(i) for i in x]
+        x = [F.max_pool1d(i, 5,stride = 2) for i in x]  # [(N, Co), ...]*len(Ks)
+        #add another conv_layer&pool_layer
+        x = [F.relu(self.conv2(i)) for i in x]
         x = [self.dropout(i) for i in x]
         
-        x = [F.max_pool2d(i, (2,i.size(3))).squeeze(3) for i in x]  # [(N, Co), ...]*len(Ks)
-        #add another conv_layer
-        #change_dim
-        x = [i.permute(0,2,1) for i in x]
-        x = [F.relu(self.convs2[i](x[i])) for i in range(3)]
-        x = [self.dropout(i) for i in x]
-        x = [i.permute(0,2,1) for i in x]
-        
+        x = [F.max_pool1d(i,i.shape[2]) for i in ]
+      
         x = torch.cat(x, 1).squeeze(2)
+        
         x = self.dropout(x)  # (N, len(Ks)*Co)
         res = self.fc1(x)  # (N, C)
         return res
         
-        #return x
         
 
 #test
