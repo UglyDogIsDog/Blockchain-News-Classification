@@ -33,7 +33,7 @@ class CNN_Text(nn.Module):
         x = torch.cat(x, 1)
         x = self.dropout(x)  # (N, len(Ks)*Co)
         res = self.fc1(x)  # (N, C)
-        print(x.shape)
+        #print(x.shape)
         #res = self.act(res)
         return res
 
