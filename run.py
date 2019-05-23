@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
             #output process every 1000 batch
             if step % 1000 == 0:
+                print(output.shape,label.shape)
                 pred = torch.max(output, 1)[1]
                 accuracy = float(label[pred == label].size(0)) / float(label.size(0))
                 print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
