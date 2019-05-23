@@ -12,12 +12,12 @@ class CNN_Text(nn.Module):
     def __init__(self):
         super(CNN_Text, self).__init__()
         Co = 100 # number of kernel
-        Ks = [10, 20, 30] # size of kernels, number of features
+        Ks = [2, 3, 4] # size of kernels, number of features
         Dropout = 0.5
 
         #self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
         self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
-        self.conv2 = nn.Conv1d(100,50,5,stride = 3)
+        self.conv2 = nn.Conv1d(100,50,5,stride = 4)
         self.conv3 = nn.Conv1d(50,25,5)#in_channels,out_channels,kernel_size
         self.dropout = nn.Dropout(Dropout)
         self.fc1 = nn.Linear(len(Ks)*Co//2, 2)
