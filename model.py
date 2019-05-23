@@ -11,7 +11,6 @@ import torch.utils.data as Data
 import torch.nn.functional as F
 #output = torch.randn(100,128,768)#测试用例
 class CNN_Text(nn.Module):
-    print('0:'+ str(vec.shape))
     def __init__(self):
         super(CNN_Text, self).__init__()
         Co = 100 # number of kernel
