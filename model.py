@@ -20,6 +20,7 @@ class CNN_Text(nn.Module):
         x = x.unsqueeze(1)  # (N, Ci, W, D)
         #print(x.shape)
         x = [F.relu(conv(x)).squeeze(3) for conv in self.convs1]  # [(N, Co, W+-), ...]*len(Ks)
+        x = [self.dropout(i) for i in x]
         x = [F.max_pool1d(i, i.size(2)).squeeze(2) for i in x]  # [(N, Co), ...]*len(Ks)
         x = torch.cat(x, 1)
         x = self.dropout(x)  # (N, len(Ks)*Co)
