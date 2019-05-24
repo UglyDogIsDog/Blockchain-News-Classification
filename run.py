@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
     #train
     for epoch in range(EPOCH):
-        if epoch % 5 == 0:
-            test(cnn, test_loader, use_cuda)
+        #if epoch % 5 == 0:
+            #test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
             vec, label = data
             if use_cuda:
