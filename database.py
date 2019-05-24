@@ -42,6 +42,9 @@ class CustomDataset(Dataset):
             pass_sen = cut_para(passage["passage"])
             if len(pass_sen) < SEN_NUM:
                 pass_sen += ["x"] * (SEN_NUM - len(pass_sen))
+            for i in range(SEN_NUM):
+                if not pass_sen[i]:
+                    pass_sen[i] = "x"
             pass_sen = pass_sen[0: SEN_NUM]
             sens += pass_sen
             
