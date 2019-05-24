@@ -71,7 +71,7 @@ def test(cnn, test_loader, use_cuda):
     print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
     print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
     print(len(pred_v))
-    
+    torch.save(pred_v,"test.json.lab")
 
 #model
 '''class CNN(nn.Module):
