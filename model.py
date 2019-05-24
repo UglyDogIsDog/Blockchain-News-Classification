@@ -58,7 +58,6 @@ def test(cnn, test_loader, use_cuda):
         #output = cnn(vec)
         label = label.to(dtype=torch.int64)
         
-        pred = torch.max(output, 1)[1]
         right_neg += label[(pred == label) & (label == 0)].size(0)
         total_neg += label[label == 0].size(0)
         right_pos += label[(pred == label) & (label == 1)].size(0)
