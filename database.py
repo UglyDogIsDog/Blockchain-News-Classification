@@ -42,17 +42,26 @@ class CustomDataset(Dataset):
             pass_sen = cut_para(passage["passage"])
             if len(pass_sen) < SEN_NUM:
                 pass_sen += ["x"] * (SEN_NUM - len(pass_sen))
+            for i in range(SEN_NUM):
+                if not pass_sen[i]:
+                    pass_sen[i] = "x"
             pass_sen = pass_sen[0: SEN_NUM]
             sens += pass_sen
             
-            if passage["label"] == 1:
-                pos_num += 1
-                pos_index += [len(self.label)]
-                self.label += [1]
+            if 'label' in passage.keys():
+                if passage["label"] == 1:
+                    pos_num += 1
+                    pos_index += [len(self.label)]
+                    self.label += [1]
+                else:
+                    neg_num += 1
+                    neg_index += [len(self.label)]
+                    self.label += [0]
             else:
                 neg_num += 1
                 neg_index += [len(self.label)]
                 self.label += [0]
+
         inp.close()
             
         #send sentences to BERT-as-service, get each sentences' vector of size 768
@@ -66,6 +75,7 @@ class CustomDataset(Dataset):
             end = min(last_num + CLIENT_BATCH_SIZE, len(sens))
             self.data[start : end] = be.encode(sens[start : end])
             last_num = end
+            print("%s got %d/%d" % (path, last_num, len(sens)))
         #reshape the data for every passage
         self.data = np.resize(self.data, ((len(self.data) // SEN_NUM), SEN_NUM, 768))
        
