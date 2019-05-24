@@ -18,9 +18,9 @@ class CNN_Text(nn.Module):
         #self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
         self.convs1 = nn.ModuleList([nn.Conv2d(1, Co, (K, 768)) for K in Ks])
         self.conv2 = nn.Conv1d(100,50,5,stride = 4)
-        self.conv3 = nn.Conv1d(50,25,5)#in_channels,out_channels,kernel_size
+        self.conv3 = nn.Conv1d(50,20,5)#in_channels,out_channels,kernel_size
         self.dropout = nn.Dropout(Dropout)
-        self.fc1 = nn.Linear(len(Ks)*Co//2, 2)
+        self.fc1 = nn.Linear(60, 2)
         #self.act = nn.Sigmoid()
 
     def forward(self, x):
@@ -30,6 +30,8 @@ class CNN_Text(nn.Module):
         x = [F.max_pool1d(i, 5,stride = 2) for i in x]  # [(N, Co), ...]*len(Ks)
         #add another conv_layer&pool_layer
         x = [F.relu(self.conv2(i)) for i in x]
+        x = [self.dropout(i) for i in x]
+        x = [F.relu(self.conv3(i)) for i in x]
         x = [self.dropout(i) for i in x]
         
         x = [F.max_pool1d(i,i.shape[2]) for i in x]
