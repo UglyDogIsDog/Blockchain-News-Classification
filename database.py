@@ -66,6 +66,7 @@ class CustomDataset(Dataset):
             end = min(last_num + CLIENT_BATCH_SIZE, len(sens))
             self.data[start : end] = be.encode(sens[start : end])
             last_num = end
+            print("%s got %d/%d" % (path, last_num, len(sens)))
         #reshape the data for every passage
         self.data = np.resize(self.data, ((len(self.data) // SEN_NUM), SEN_NUM, 768))
        
