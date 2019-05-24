@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     #get data
     train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = BATCH_SIZE, shuffle = True)
-    test_loader = Data.DataLoader(dataset = CustomDataset(path="data.json", balance=False), batch_size = BATCH_SIZE, shuffle = False)
+    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = False)
 
     #initialize model
     cnn = CNN_Text()
