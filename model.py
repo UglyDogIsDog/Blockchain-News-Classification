@@ -8,6 +8,7 @@ import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
 import json
+import numpy as np
 
 class CNN_Text(nn.Module):
     def __init__(self):
@@ -74,7 +75,7 @@ def test(cnn, test_loader, use_cuda):
     print(len(pred_v))
     #torch.save(pred_v,"test.json.lab")
     outp = open("pred_label.json", 'w', encoding="utf-8")
-    outp.write(json.dumps(pred_v, indent=4, ensure_ascii=False))
+    outp.write(json.dumps(list(np.array(pred_v)), indent=4, ensure_ascii=False))
     outp.close()
 
 #model
