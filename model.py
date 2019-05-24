@@ -51,11 +51,12 @@ def test(cnn, test_loader, use_cuda):
     right_pos, total_pos = 0, 0
     for step, data in enumerate(test_loader):
         print(data)
-        vec, label = data
+        vec, label,passage = data
+        print(passage)
         if use_cuda:
             vec = vec.cuda()
             label = label.cuda()
-        output = cnn(vec)
+        #output = cnn(vec)
         label = label.to(dtype=torch.int64)
         
         pred = torch.max(output, 1)[1]
