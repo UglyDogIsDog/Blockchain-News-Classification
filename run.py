@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     #get data
     train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = BATCH_SIZE, shuffle = True)
-    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = False)
+    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = True)
 
     #initialize model
     cnn = CNN_Text()
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
     #train
     for epoch in range(EPOCH):
-        #if epoch % 5 == 0:
-            #test(cnn, test_loader, use_cuda)
+        if epoch % 5 == 0:
+            test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
             vec, label = data
             if use_cuda:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+   
             #output process every 1000 batch
             if step % 1000 == 0:
                 pred = torch.max(output, 1)[1]
