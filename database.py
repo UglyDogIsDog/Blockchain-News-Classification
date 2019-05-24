@@ -25,9 +25,6 @@ class CustomDataset(Dataset):
         if os.path.isfile(path + ".dat") and os.path.isfile(path + ".lab"):    
             self.data = torch.load(path + ".dat")
             self.label = torch.load(path + ".lab")
-            inp = open(path, "rb")
-            self.passages = json.load(inp)
-            inp.close()
             return
         
 
@@ -91,7 +88,7 @@ class CustomDataset(Dataset):
         torch.save(self.label, path + ".lab")
 
     def __getitem__(self, index):
-        return self.data[index], self.label[index],self.passages[index]
+        return self.data[index], self.label[index]
 
     def __len__(self):
         return self.data.shape[0]
