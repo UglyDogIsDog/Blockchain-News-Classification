@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     #get data
     train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = BATCH_SIZE, shuffle = True)
-    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = True)
+    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = False)
 
     #initialize model
     cnn = CNN_Text()
@@ -39,8 +39,7 @@ if __name__ == "__main__":
         if epoch % 5 == 0:
             test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
-            vec, label,passage = data
-            print(passage)
+            vec, label = data
             if use_cuda:
                 vec = vec.cuda()
                 label = label.cuda()
