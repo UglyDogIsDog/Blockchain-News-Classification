@@ -71,7 +71,7 @@ def test(cnn, test_loader, use_cuda):
         total += label.size(0)
     print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
     print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
-    #print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
+    print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
     #print(len(pred_v))
     #print("predict positive number:",pred_v[pred_v==1].size(0),"predict negative number:",pred_v[pred_v==0].size(0))
     torch.save(pred_v,"test.json.lab")
