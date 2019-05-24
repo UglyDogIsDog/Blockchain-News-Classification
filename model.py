@@ -46,6 +46,7 @@ class CNN_Text(nn.Module):
 
 #test
 def test(cnn, test_loader, use_cuda):
+    pred_v = []
     right, total = 0, 0
     right_neg, total_neg = 0, 0
     right_pos, total_pos = 0, 0
@@ -57,8 +58,9 @@ def test(cnn, test_loader, use_cuda):
             label = label.cuda()
         output = cnn(vec)
         pred = torch.max(output,1)[1]
+        pred_v.extend(pred)
         label = label.to(dtype=torch.int64)
-       
+        
         right_neg += label[(pred == label) & (label == 0)].size(0)
         total_neg += label[label == 0].size(0)
         right_pos += label[(pred == label) & (label == 1)].size(0)
@@ -68,6 +70,7 @@ def test(cnn, test_loader, use_cuda):
     print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
     print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
     print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
+    print(len(pred_v))
     
 
 #model
