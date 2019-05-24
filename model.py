@@ -7,6 +7,7 @@ import getopt
 import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
+import json
 
 class CNN_Text(nn.Module):
     def __init__(self):
