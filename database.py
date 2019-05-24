@@ -45,14 +45,20 @@ class CustomDataset(Dataset):
             pass_sen = pass_sen[0: SEN_NUM]
             sens += pass_sen
             
-            if passage["label"] == 1:
-                pos_num += 1
-                pos_index += [len(self.label)]
-                self.label += [1]
+            if 'label' in passage.keys():
+                if passage["label"] == 1:
+                    pos_num += 1
+                    pos_index += [len(self.label)]
+                    self.label += [1]
+                else:
+                    neg_num += 1
+                    neg_index += [len(self.label)]
+                    self.label += [0]
             else:
                 neg_num += 1
                 neg_index += [len(self.label)]
                 self.label += [0]
+
         inp.close()
             
         #send sentences to BERT-as-service, get each sentences' vector of size 768
