@@ -50,6 +50,7 @@ def test(cnn, test_loader, use_cuda):
     right_neg, total_neg = 0, 0
     right_pos, total_pos = 0, 0
     for step, data in enumerate(test_loader):
+        print(data)
         vec, label = data
         if use_cuda:
             vec = vec.cuda()
@@ -67,7 +68,7 @@ def test(cnn, test_loader, use_cuda):
     print('Accuracy:%.3f %d/%d' % (float(right_neg + right_pos) / float(total_neg + total_pos), right_neg + right_pos, total_neg + total_pos))
     print('Negative accuracy:%.3f  %d/%d' % (float(right_neg) / float(total_neg), right_neg, total_neg))
     print('Positive accuracy:%.3f  %d/%d' % (float(right_pos) / float(total_pos), right_pos, total_pos))
-
+    
 
 #model
 '''class CNN(nn.Module):
