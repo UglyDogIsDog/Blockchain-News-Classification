@@ -45,6 +45,20 @@ class MLP_model(nn.Module):
         f = self.linear2(f)
         return f #self.softmax(f)
 
+class SimpleCustomBatch:
+    def __init__(self, data):
+        transposed_data = list(zip(*data))
+        self.inp = transposed_data[0]
+        self.tgt = transposed_data[1]
+
+    def pin_memory(self):
+        self.inp = self.inp.pin_memory()
+        self.tgt = self.tgt.pin_memory()
+        return self
+
+def collate_wrapper(batch):
+    return SimpleCustomBatch(batch)
+
 if __name__ == "__main__":  
     # Hyperparameters
     parser = argparse.ArgumentParser()
@@ -63,8 +77,8 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True)
-    dev_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)
+    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True, collate_fn=collate_wrapper, pin_memory=True)
+    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False, collate_fn=collate_wrapper, pin_memory=True)
 
     #initialize model
     lstm = LSTM_model()
@@ -84,6 +98,8 @@ if __name__ == "__main__":
         total_loss = 0
         for step, data in enumerate(data_loader):
             sens, labels = data
+            print(self.inp.shape)
+            print(self.tgt.shape)
             if use_cuda:
                 sens = sens.cuda()
                 labels = labels.cuda()
