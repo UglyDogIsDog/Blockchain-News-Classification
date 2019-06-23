@@ -6,16 +6,16 @@ import torch.nn.functional as F
 import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
 
-from database import CustomDataset
-from model import CNN_Text, test
+from database import CustomDataset, SEN_NUM
+#from model import CNN_Text, test
 
-BERT_MAX_SEQ_LEN = 64
+#BERT_MAX_SEQ_LEN = 64
 
 class LSTM_model(nn.Module):
     def __init__(self):
         super(LSTM_model, self).__init__()
         self.lstm = nn.LSTM(768, args.hidden_layer, num_layers=2, bidirectional=True)
-        self.pooling = nn.MaxPool1d(BERT_MAX_SEQ_LEN)
+        self.pooling = nn.MaxPool1d(SEN_NUM)
 
     def forward(self, sens): #, lens):
         #lens, perm_idx = lens.sort(0, descending=True)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = args.batch_size, shuffle = True)
+    train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True)
     dev_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)
 
     #initialize model
