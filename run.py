@@ -134,11 +134,13 @@ if __name__ == "__main__":
             else:
                 pred_sum += pred
         
-        pred = torch.zeros(pred.shape)
+        pred = torch.zeros(pred.shape).to(dtype=torch.int64)
+        if use_cuda:
+            pred = pred.cuda()
         pred[pred_sum > (CHECK_TIME * 1.0 / 2)] = 1
         labels = targ
 
-        right_num += labels[pred.to(dtype=torch.int64).cuda() == labels.cuda()].size(0)
+        right_num += labels[pred == labels].size(0)
         total_num += labels.size(0)
         true_pos += labels[(labels == 1) & (pred == labels)].size(0)
         pos += labels[pred == 1].size(0)
