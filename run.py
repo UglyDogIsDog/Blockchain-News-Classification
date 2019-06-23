@@ -11,7 +11,7 @@ from database import CustomDataset, SEN_NUM
 #from model import CNN_Text, test
 
 #BERT_MAX_SEQ_LEN = 64
-CHECK_TIME = 9
+#CHECK_TIME = 1
 
 class LSTM_model(nn.Module):
     def __init__(self):
@@ -68,14 +68,15 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
-    parser.add_argument("-r", "--regularization", type=float, default=0.003) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
 
     # relatively loose hyperparameters
-    parser.add_argument("-e", "--epoch", type=int, default=500)
+    parser.add_argument("-e", "--epoch", type=int, default=5000)
     parser.add_argument("-bs", "--batch_size", type=int, default=32)
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=50)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
+    parser.add_argument("-ct", "--check_time", type=int, default=3)
     args = parser.parse_args()
 
     #use CUDA to speed up
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         true = 0
         total_loss = 0
 
-        iteration = 1 if update_model else CHECK_TIME
+        iteration = 1 if update_model else args.check_time
 
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
