@@ -105,8 +105,6 @@ if __name__ == "__main__":
         iteration = 1 if update_model else CHECK_TIME
 
         for ite in range(iteration):
-            pred = torch.tensor()
-            targ = torch.tensor()
             for step, data in enumerate(data_loader):
                 sens, lens, labels = data
                 if use_cuda:
@@ -124,8 +122,12 @@ if __name__ == "__main__":
                     clip_grad_norm_(lstm.parameters(), args.clip)
                     optimizer.step()
                 
-                pred = torch.concat((pred, torch.max(score, 1)[1]), dim=0)
-                targ = torch.concat((targ, labels), dim=0)
+                if step == 0:
+                    pred = torch.max(score, 1)[1]
+                    targ = labels
+                else:
+                    pred = torch.concat((pred, torch.max(score, 1)[1]), dim=0)
+                    targ = torch.concat((targ, labels), dim=0)
             if ite == 0:
                 pred_sum = pred
             else:
