@@ -80,6 +80,7 @@ if __name__ == "__main__":
         true_pos = 0
         pos = 0
         true = 0
+        total_loss = 0
         for step, data in enumerate(data_loader):
             sens, labels = data
             if use_cuda:
@@ -98,12 +99,13 @@ if __name__ == "__main__":
 
             if update_model:
                 loss = F.cross_entropy(score, labels)
+                total_loss += loss
                 optimizer.zero_grad()
                 loss.backward()
                 clip_grad_norm_(lstm.parameters(), args.clip)
                 optimizer.step()
         if update_model:
-            print("train: loss: {} ".format(loss), end="")
+            print("train: loss: {} ".format(total_loss), end="")
         else:
             print("dev: ", end="")
         accuracy = float(right_num) / total_num
