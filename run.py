@@ -5,6 +5,7 @@ import torch.utils.data as Data
 import torch.nn.functional as F
 import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from database import CustomDataset, SEN_NUM
 #from model import CNN_Text, test
