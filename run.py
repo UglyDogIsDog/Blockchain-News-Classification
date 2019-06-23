@@ -40,7 +40,7 @@ class MLP_model(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, f):
-        f = self.dropout(F.relu(self.linear1(f)))
+        f = F.relu(self.linear1(f)) #self.dropout(F.relu(self.linear1(f)))
         #f = self.dropout(F.relu(self.linear2(f)))
         f = self.linear2(f)
         return f #self.softmax(f)
@@ -49,14 +49,14 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-2)
-    parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.001) #normally 0.0005
 
     # relatively loose hyperparameters
     parser.add_argument("-e", "--epoch", type=int, default=500)
     parser.add_argument("-bs", "--batch_size", type=int, default=32)
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=50)
-    parser.add_argument("-de", "--decay_epoch", type=int, default=50)
+    parser.add_argument("-de", "--decay_epoch", type=int, default=20)
     args = parser.parse_args()
 
     #use CUDA to speed up
