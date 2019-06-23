@@ -107,7 +107,6 @@ if __name__ == "__main__":
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
                 sens, lens, labels = data
-                labels = labels.to(dtype=torch.int64)
                 if use_cuda:
                     sens = sens.cuda()
                     lens = lens.cuda()
