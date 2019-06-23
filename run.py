@@ -4,6 +4,7 @@ import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
 import torch.nn as nn
+from torch.nn.utils import clip_grad_norm_
 
 from database import CustomDataset
 from model import CNN_Text, test
@@ -62,7 +63,7 @@ if __name__ == "__main__":
 
     #get data
     train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = args.batch_size, shuffle = True)
-    test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)
+    dev_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)
 
     #initialize model
     lstm = LSTM_model()
@@ -154,18 +155,4 @@ if __name__ == "__main__":
                 optimizer.zero_grad()
                 loss.backward()
                 clip_grad_norm_(lstm.parameters(), args.clip)
-                optimizer.step()
-'''
-            '''
-            loss = F.cross_entropy(output, label)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-   
-            #output process every 1000 batch
-            if step % 1000 == 0:
-                pred = torch.max(output, 1)[1]
-                accuracy = float(label[pred == label].size(0)) / float(label.size(0))
-                print('Epoch:', epoch, '|| Loss:%.4f' % loss, '|| Accuracy:%.3f' % accuracy)
-
-    test(cnn, test_loader, use_cuda)'''
+                optimizer.step() '''
