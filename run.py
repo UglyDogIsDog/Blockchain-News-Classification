@@ -32,7 +32,8 @@ if __name__ == "__main__":
     cnn = CNN_Text()
     if use_cuda:
         cnn = cnn.cuda()
-    optimizer = torch.optim.Adam(cnn.parameters(), lr = LR, weight_decay=0.0005)
+    optimizer = torch.optim.Adam(cnn.parameters(), lr = LR, weight_decay=0.0005);
+
 
     #train
     for epoch in range(EPOCH):
