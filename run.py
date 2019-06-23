@@ -56,6 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("-bs", "--batch_size", type=int, default=32)
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=50)
+    parser.add_argument("-de", "--decay_epoch", type=int, default=50)
     args = parser.parse_args()
 
     #use CUDA to speed up
@@ -71,8 +72,8 @@ if __name__ == "__main__":
     if use_cuda:
         lstm = lstm.cuda()
         mlp = mlp.cuda()
-    optimizer = torch.optim.Adam(lstm.parameters(), lr=args.learning_rate, weight_decay=args.regularization)
-
+    learning_rate = args.learning_rate
+    optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate, weight_decay=args.regularization)
 
     def run(data_loader, update_model):
         total_num = 0
@@ -128,6 +129,10 @@ if __name__ == "__main__":
         print("epoch:{}".format(epoch + 1))
         run(data_loader=train_loader, update_model=True)
         run(data_loader=dev_loader, update_model=False)
+        if epoch + 1 % args.decay_epoch == 0:
+            learning_rate /= 2
+            print("lr: {}".format(learning_rate))
+            optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate, weight_decay=args.regularization)
 '''
     #train
     for epoch in range(args.epoch):
