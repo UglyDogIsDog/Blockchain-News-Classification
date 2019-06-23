@@ -45,9 +45,10 @@ class CustomDataset(Dataset):
         #neg_index = []
         for passage in passages:
             pass_sen = cut_para(passage["passage"])
-            self.start = len(sens)
+            self.start += [len(sens)]
             sens += pass_sen
-            self.end = len(sens)
+            self.end += [len(sens)]
+            self.label += [passage["label"]]
         inp.close()
         self.data = be.encode(sens)
         torch.save(torch.FloatTensor(self.data), path + ".dat")
