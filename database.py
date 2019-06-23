@@ -116,7 +116,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, index):
         if self.end[index] - self.start[index] <= SEN_NUM:
-            para = self.data[self.start[index], self.end[index]]
+            para = self.data[self.start[index] : self.end[index]]
             length = self.end[index] - self.start[index]
             para = torch.cat((para, torch.zeros((SEN_NUM - (self.end[index] - self.start[index]), 768))), dim=0)
             print(para.shape)
@@ -124,7 +124,7 @@ class CustomDataset(Dataset):
             start = random.randint(0, self.end[index] - SEN_NUM)
             end = start + SEN_NUM
             length = SEN_NUM
-            para = self.data[start, end]
+            para = self.data[start : end]
             
         return para, length, self.label[index]
 
