@@ -33,8 +33,8 @@ class LSTM_model(nn.Module):
 class MLP_model(nn.Module):
     def __init__(self):
         super(MLP_model, self).__init__()
-        self.linear1 = nn.Linear(args.hidden_layer * 2, 50) 
-        self.linear2 = nn.Linear(50, 2)
+        self.linear1 = nn.Linear(args.hidden_layer * 2, 30) 
+        self.linear2 = nn.Linear(30, 2)
         #self.linear3 = nn.Linear(50, 2)
         self.dropout = nn.Dropout(0)
         self.softmax = nn.Softmax(dim=1)
@@ -49,13 +49,13 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
-    parser.add_argument("-r", "--regularization", type=float, default=0.001) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
 
     # relatively loose hyperparameters
     parser.add_argument("-e", "--epoch", type=int, default=500)
     parser.add_argument("-bs", "--batch_size", type=int, default=32)
     parser.add_argument("-c", "--clip", type=float, default=1)
-    parser.add_argument("-hl", "--hidden_layer", type=int, default=100)
+    parser.add_argument("-hl", "--hidden_layer", type=int, default=50)
     args = parser.parse_args()
 
     #use CUDA to speed up
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 clip_grad_norm_(lstm.parameters(), args.clip)
                 optimizer.step()
         if update_model:
-            print("train: loss: {}".format(loss), end="")
+            print("train: loss: {} ".format(loss), end="")
         else:
             print("dev: ", end="")
         accuracy = float(right_num) / total_num
