@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
-    parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.001) #normally 0.0005
 
     # relatively loose hyperparameters
     parser.add_argument("-e", "--epoch", type=int, default=500)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 clip_grad_norm_(lstm.parameters(), args.clip)
                 optimizer.step()
         if update_model:
-            print("train: ", end="")
+            print("train: loss: {}".format(loss), end="")
         else:
             print("dev: ", end="")
         accuracy = float(right_num) / total_num
