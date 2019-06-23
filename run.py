@@ -136,7 +136,7 @@ if __name__ == "__main__":
         pred = torch.zeros(pred.shape).to(dtype=torch.int64)
         if use_cuda:
             pred = pred.cuda()
-        pred[pred_sum > (CHECK_TIME * 1.0 / 2)] = 1
+        pred[pred_sum > (iteration * 1.0 / 2)] = 1
         labels = targ
 
         right_num += labels[pred == labels].size(0)
