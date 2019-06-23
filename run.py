@@ -48,7 +48,7 @@ class MLP_model(nn.Module):
 if __name__ == "__main__":  
     # Hyperparameters
     parser = argparse.ArgumentParser()
-    parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
+    parser.add_argument("-lr", "--learning_rate", type=float, default=1e-2)
     parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
 
     # relatively loose hyperparameters
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         print("epoch:{}".format(epoch + 1))
         run(data_loader=train_loader, update_model=True)
         run(data_loader=dev_loader, update_model=False)
-        if epoch + 1 % args.decay_epoch == 0:
+        if (epoch + 1) % args.decay_epoch == 0:
             learning_rate /= 2
             print("lr: {}".format(learning_rate))
             optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate, weight_decay=args.regularization)
