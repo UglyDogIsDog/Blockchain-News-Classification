@@ -126,8 +126,8 @@ if __name__ == "__main__":
                     pred = torch.max(score, 1)[1]
                     targ = labels
                 else:
-                    pred = torch.concat((pred, torch.max(score, 1)[1]), dim=0)
-                    targ = torch.concat((targ, labels), dim=0)
+                    pred = torch.cat((pred, torch.max(score, 1)[1]), dim=0)
+                    targ = torch.cat((targ, labels), dim=0)
             if ite == 0:
                 pred_sum = pred
             else:
