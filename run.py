@@ -17,17 +17,17 @@ class LSTM_model(nn.Module):
         self.lstm = nn.LSTM(768, args.hidden_layer, num_layers=2, bidirectional=True)
         self.pooling = nn.MaxPool1d(SEN_NUM)
 
-    def forward(self, sens): #, lens):
-        #lens, perm_idx = lens.sort(0, descending=True)
-        #sens = sens[perm_idx]
+    def forward(self, sens, lens):
+        lens, perm_idx = lens.sort(0, descending=True)
+        sens = sens[perm_idx]
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
-        #sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
+        sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
         o, (h, c) = self.lstm(sens) # o: L * B * 2V
-        #o = pad_packed_sequence(o, batch_first=False, padding_value=0.0, total_length=None)[0] # <L * B * 2V
+        o = pad_packed_sequence(o, batch_first=False, padding_value=0.0, total_length=None)[0] # <L * B * 2V
 
         h = self.pooling(o.permute(1, 2, 0)).squeeze(2) # B * 2V
-        #_, unperm_idx = perm_idx.sort(0)
-        #h = h[unperm_idx]
+        _, unperm_idx = perm_idx.sort(0)
+        h = h[unperm_idx]
         return h
 
 class MLP_model(nn.Module):
@@ -44,7 +44,7 @@ class MLP_model(nn.Module):
         #f = self.dropout(F.relu(self.linear2(f)))
         f = self.linear2(f)
         return f #self.softmax(f)
-
+'''
 class SimpleCustomBatch:
     def __init__(self, data):
         transposed_data = list(zip(*data))
@@ -61,7 +61,7 @@ class SimpleCustomBatch:
 
 def collate_wrapper(batch):
     return SimpleCustomBatch(batch)
-
+'''
 if __name__ == "__main__":  
     # Hyperparameters
     parser = argparse.ArgumentParser()
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True, collate_fn=collate_wrapper, pin_memory=True)
-    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False, collate_fn=collate_wrapper, pin_memory=True)
+    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True)#, collate_fn=collate_wrapper, pin_memory=True)
+    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)#, collate_fn=collate_wrapper, pin_memory=True)
 
     #initialize model
     lstm = LSTM_model()
@@ -100,13 +100,14 @@ if __name__ == "__main__":
         true = 0
         total_loss = 0
         for step, data in enumerate(data_loader):
-            sens, labels = data.inp, data.tgt
-            print(data.inp.shape)
-            print(data.tgt.shape)
+            sens, lens, labels = data
+            #print(data.inp.shape)
+            #print(data.tgt.shape)
             if use_cuda:
                 sens = sens.cuda()
+                lens = lens.cuda()
                 labels = labels.cuda()
-            h = lstm(sens)
+            h = lstm(sens, lens)
             score = mlp(h) # B * Labels
             
             pred = torch.max(score, 1)[1]
