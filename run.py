@@ -50,9 +50,9 @@ class SimpleCustomBatch:
         transposed_data = list(zip(*data))
         #print(transposed_data)
         self.inp = torch.stack(transposed_data[0], 0)
-        print(self.inp.shape)
+        #print(self.inp.shape)
         self.tgt = torch.tensor(transposed_data[1])
-        print(self.tgt.shape)
+        #print(self.tgt.shape)
 
     def pin_memory(self):
         self.inp = self.inp.pin_memory()
@@ -100,9 +100,9 @@ if __name__ == "__main__":
         true = 0
         total_loss = 0
         for step, data in enumerate(data_loader):
-            sens, labels = data
-            print(self.inp.shape)
-            print(self.tgt.shape)
+            sens, labels = data.inp, data.tgt
+            print(data.inp.shape)
+            print(data.tgt.shape)
             if use_cuda:
                 sens = sens.cuda()
                 labels = labels.cuda()
