@@ -29,6 +29,21 @@ class LSTM_model(nn.Module):
         #h = h[unperm_idx]
         return h
 
+class MLP_model(nn.Module):
+    def __init__(self):
+        super(MLP_model, self).__init__()
+        self.linear1 = nn.Linear(600, 150) 
+        self.linear2 = nn.Linear(150, 50)
+        self.linear3 = nn.Linear(50, 2)
+        self.dropout = nn.Dropout(0)
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, f):
+        f = self.dropout(F.relu(self.linear1(f)))
+        f = self.dropout(F.relu(self.linear2(f)))
+        f = self.linear3(f)
+        return f #self.softmax(f)
+
 if __name__ == "__main__":  
     # Hyperparameters
     parser = argparse.ArgumentParser()
@@ -51,11 +66,66 @@ if __name__ == "__main__":
 
     #initialize model
     lstm = LSTM_model()
+    mlp = MLP_model()
     if use_cuda:
         lstm = lstm.cuda()
+        mlp = mlp.cuda()
     optimizer = torch.optim.Adam(lstm.parameters(), lr=args.learning_rate, weight_decay=args.regularization)
 
 
+    def run(data_loader, update_model):
+        total_num = 0
+        right_num = 0
+        true_pos = 0
+        pos = 0
+        true = 0
+        for step, data in enumerate(data_loader):
+            sens, labels = data
+            if use_cuda:
+                sens = sens.cuda()
+                labels = labels.cuda()
+            h = lstm(sens)
+            score = mlp(h) # B * Labels
+            
+            pred = torch.max(score, 1)[1]
+
+            right_num += labels[pred == labels].size(0)
+            total_num += labels.size(0)
+            true_pos += labels[(labels == 1) & (pred == labels)].size(0)
+            pos += labels[pred == 1].size(0)
+            true += labels[labels == 1].size(0)
+
+            if update_model:
+                loss = F.cross_entropy(score, labels)
+                optimizer.zero_grad()
+                loss.backward()
+                clip_grad_norm_(lstm.parameters(), args.clip)
+                optimizer.step()
+        if update_model:
+            print("train: ", end="")
+        else:
+            print("dev: ", end="")
+        accuracy = float(right_num) / total_num
+        
+        print("accuracy: {} ".format(accuracy), end="")
+        if pos > 0:
+            precision = float(true_pos) / pos
+            print("precision: {} ".format(precision), end="")
+        if true > 0:
+            recall = float(true_pos) / true
+            print("recall: {} ".format(recall), end="")
+        if pos > 0 and true > 0 and (precision + recall) > 0:
+            F1 = 2.0 * precision * recall / (precision + recall)
+            print("F1: {} ".format(F1))
+        else:
+            print()
+
+    #train
+    for epoch in range(args.epoch):
+        print("epoch:{}".format(epoch + 1))
+        run(data_loader=train_loader, update_model=True)
+        run(data_loader=dev_loader, update_model=False)
+'''
     #train
     for epoch in range(args.epoch):
         #if epoch % 5 == 0:
@@ -66,10 +136,26 @@ if __name__ == "__main__":
                 vec = vec.cuda()
                 label = label.cuda()
             h = lstm(vec)
+            score = mlp(h)
+            pred = torch.max(score, 1)[1]
             print(h.shape)
             
             label = label.to(dtype=torch.int64)
 
+            right_num += labels[pred == labels].size(0)
+            total_num += labels.size(0)
+            true_pos += labels[(labels == 1) & (pred == labels)].size(0)
+            pos += labels[pred == 1].size(0)
+            true += labels[labels == 1].size(0)
+
+            if update_model:
+                loss = F.cross_entropy(score, labels)
+                #loss = F.mse_loss(manhattan_distance, labels.float()) # mse_loss or l1_loss?
+                optimizer.zero_grad()
+                loss.backward()
+                clip_grad_norm_(lstm.parameters(), args.clip)
+                optimizer.step()
+'''
             '''
             loss = F.cross_entropy(output, label)
             optimizer.zero_grad()
