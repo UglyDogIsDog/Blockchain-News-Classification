@@ -49,8 +49,10 @@ class SimpleCustomBatch:
     def __init__(self, data):
         transposed_data = list(zip(*data))
         #print(transposed_data)
-        self.inp = torch.tensor(transposed_data[0])
+        self.inp = torch.stack(transposed_data[0], 0)
+        print(self.inp.shape)
         self.tgt = torch.tensor(transposed_data[1])
+        print(self.tgt.shape)
 
     def pin_memory(self):
         self.inp = self.inp.pin_memory()
