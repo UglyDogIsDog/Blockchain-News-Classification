@@ -11,7 +11,7 @@ from database import CustomDataset, SEN_NUM
 #from model import CNN_Text, test
 
 #BERT_MAX_SEQ_LEN = 64
-CHECK_TIME = 3
+CHECK_TIME = 9
 
 class LSTM_model(nn.Module):
     def __init__(self):
