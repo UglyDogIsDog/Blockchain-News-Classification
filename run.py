@@ -33,16 +33,16 @@ class LSTM_model(nn.Module):
 class MLP_model(nn.Module):
     def __init__(self):
         super(MLP_model, self).__init__()
-        self.linear1 = nn.Linear(600, 150) 
-        self.linear2 = nn.Linear(150, 50)
-        self.linear3 = nn.Linear(50, 2)
+        self.linear1 = nn.Linear(args.hidden_layer * 2, 50) 
+        self.linear2 = nn.Linear(50, 2)
+        #self.linear3 = nn.Linear(50, 2)
         self.dropout = nn.Dropout(0)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, f):
         f = self.dropout(F.relu(self.linear1(f)))
-        f = self.dropout(F.relu(self.linear2(f)))
-        f = self.linear3(f)
+        #f = self.dropout(F.relu(self.linear2(f)))
+        f = self.linear2(f)
         return f #self.softmax(f)
 
 if __name__ == "__main__":  
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--epoch", type=int, default=500)
     parser.add_argument("-bs", "--batch_size", type=int, default=32)
     parser.add_argument("-c", "--clip", type=float, default=1)
-    parser.add_argument("-hl", "--hidden_layer", type=int, default=300)
+    parser.add_argument("-hl", "--hidden_layer", type=int, default=100)
     args = parser.parse_args()
 
     #use CUDA to speed up
