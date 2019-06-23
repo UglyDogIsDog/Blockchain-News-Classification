@@ -35,8 +35,8 @@ class LSTM_model(nn.Module):
 class MLP_model(nn.Module):
     def __init__(self):
         super(MLP_model, self).__init__()
-        self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer / 2) 
-        self.linear2 = nn.Linear(args.hidden_layer / 2, 2)
+        self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer // 2) 
+        self.linear2 = nn.Linear(args.hidden_layer // 2, 2)
         #self.linear3 = nn.Linear(50, 2)
         self.dropout = nn.Dropout(0)
         self.softmax = nn.Softmax(dim=1)
