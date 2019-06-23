@@ -11,6 +11,7 @@ from database import CustomDataset, SEN_NUM
 #from model import CNN_Text, test
 
 #BERT_MAX_SEQ_LEN = 64
+CHECK_TIME = 3
 
 class LSTM_model(nn.Module):
     def __init__(self):
@@ -100,32 +101,47 @@ if __name__ == "__main__":
         pos = 0
         true = 0
         total_loss = 0
-        for step, data in enumerate(data_loader):
-            sens, lens, labels = data
-            #print(data.inp.shape)
-            #print(data.tgt.shape)
-            if use_cuda:
-                sens = sens.cuda()
-                lens = lens.cuda()
-                labels = labels.cuda()
-            h = lstm(sens, lens)
-            score = mlp(h) # B * Labels
+
+        iteration = 1 if update_model else CHECK_TIME
+
+        for ite in range(iteration):
+            pred = torch.tensor()
+            targ = torch.tensor()
+            for step, data in enumerate(data_loader):
+                sens, lens, labels = data
+                if use_cuda:
+                    sens = sens.cuda()
+                    lens = lens.cuda()
+                    labels = labels.cuda()
+                h = lstm(sens, lens)
+                score = mlp(h) # B * Labels
+
+                if update_model:
+                    loss = F.cross_entropy(score, labels)
+                    total_loss += loss
+                    optimizer.zero_grad()
+                    loss.backward()
+                    clip_grad_norm_(lstm.parameters(), args.clip)
+                    optimizer.step()
+                
+                pred = torch.concat((pred, torch.max(score, 1)[1]), dim=0)
+                targ = torch.concat((targ, labels), dim=0)
+            if ite == 0:
+                pred_sum = pred
+            else:
+                pred_sum += pred
+        
+        pred = torch.zeros(pred.shape)
+        pred[pred_sum > (CHECK_TIME * 1.0 / 2)] = 1
+        labels = targ
+
+        right_num += labels[pred == labels].size(0)
+        total_num += labels.size(0)
+        true_pos += labels[(labels == 1) & (pred == labels)].size(0)
+        pos += labels[pred == 1].size(0)
+        true += labels[labels == 1].size(0)
+
             
-            pred = torch.max(score, 1)[1]
-
-            right_num += labels[pred == labels].size(0)
-            total_num += labels.size(0)
-            true_pos += labels[(labels == 1) & (pred == labels)].size(0)
-            pos += labels[pred == 1].size(0)
-            true += labels[labels == 1].size(0)
-
-            if update_model:
-                loss = F.cross_entropy(score, labels)
-                total_loss += loss
-                optimizer.zero_grad()
-                loss.backward()
-                clip_grad_norm_(lstm.parameters(), args.clip)
-                optimizer.step()
         if update_model:
             print("train: loss: {} ".format(total_loss), end="")
         else:
