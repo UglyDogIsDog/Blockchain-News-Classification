@@ -34,6 +34,7 @@ class CustomDataset(Dataset):
 
         be = BertClient()
         
+        self.sen_num = sen_num
         #read data
         inp = open(path, "rb")
         passages = json.load(inp)
