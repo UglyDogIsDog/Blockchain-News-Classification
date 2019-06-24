@@ -85,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("-ct", "--check_time", type=int, default=1)
     parser.add_argument("-sn", "--sen_num", type=int, default=200)
     parser.add_argument("-tm", "--train_model", type=bool, default=False)
-    parser.add_argument("-s", "--step", type=int, default=10)
+    parser.add_argument("-s", "--step", type=int, default=256)
     args = parser.parse_args()
 
     #use CUDA to speed up
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
                 sens, lens, labels = data
-                print(lens)
+                #print(lens)
                 if use_cuda:
                     sens = sens.cuda()
                     lens = lens.cuda()
@@ -211,9 +211,15 @@ if __name__ == "__main__":
             inp = open("test.json", "r", encoding="utf-8")
             passages = json.load(inp)
             for i in range(args.step):
-                print(pred[i].item())
+                #print(pred[i].item())
                 passages[begin + i]['label'] = pred[i].item()
             inp.close()
+
+            outp = open("test.json", 'w', encoding="utf-8")
+            outp.write(json.dumps(passages, indent=4, ensure_ascii=False))
+            outp.close()
+
+            print("{}/{}".format(begin, number))
         
     '''
     #train
