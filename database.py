@@ -33,7 +33,7 @@ class CustomDataset(Dataset):
         
 
         be = BertClient()
-        
+
         self.sen_num = sen_num
         #read data
         inp = open(path, "rb")
@@ -56,7 +56,8 @@ class CustomDataset(Dataset):
                 self.label += [0]
         inp.close()
         self.data = be.encode(sens)
-        torch.save(torch.FloatTensor(self.data), path + ".dat")
+        self.data = torch.FloatTensor(self.data)
+        torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
         torch.save(self.start, path + ".sta")
         torch.save(self.end, path + ".end")
