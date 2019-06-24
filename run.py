@@ -9,7 +9,7 @@ from model import CNN_Text, test
 
 if __name__ == "__main__":  
     # Hyper Parameters
-    EPOCH = 20
+    EPOCH = 200
     BATCH_SIZE = 32
     LR = 1e-3
     opts, args = getopt.getopt(sys.argv[1:],'-b:-l:-e:', ['batch_size=', 'learning_rate=', 'epoch='])
