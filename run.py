@@ -177,15 +177,23 @@ if __name__ == "__main__":
 
     #train
     F1_max = 0
+    
+    lstm.load_state_dict(torch.load("lstm.pk"))
+    lstm.eval()
+    mlp.load_state_dict(torch.load("mlp.pk"))
+    mlp.eval()
     for epoch in range(args.epoch):
         print("epoch:{}".format(epoch + 1))
-        run(data_loader=train_loader, update_model=True)
+        #run(data_loader=train_loader, update_model=True)
         F1 = run(data_loader=dev_loader, update_model=False)
+        
+        '''
         if F1 > F1_max:
             torch.save(lstm.state_dict(), "lstm.pk")
             torch.save(mlp.state_dict(), "mlp.pk")
             print("F1: {} saved".format(F1))
             F1_max = F1
+        '''
         #if (epoch + 1) % args.decay_epoch == 0:
         #    learning_rate /= 2
         #    print("lr: {}".format(learning_rate))
