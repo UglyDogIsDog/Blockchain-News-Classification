@@ -204,7 +204,7 @@ if __name__ == "__main__":
         passages = json.load(inp)
         end = len(passages)
         for begin in range(0, end, args.step):
-            if passages[max(end, begin + args.step - 1)].get("label", None) == None:
+            if passages[min(end - 1, begin + args.step - 1)].get("label", None) == None:
                 break
         start = begin
         inp.close()
