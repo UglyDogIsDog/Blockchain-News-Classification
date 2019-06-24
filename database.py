@@ -124,6 +124,7 @@ class CustomDataset(Dataset):
             #print(para.shape)
         else:
             start = random.randint(0, self.end[index] - SEN_NUM)
+            print(start)
             end = start + SEN_NUM
             length = SEN_NUM
             para = self.data[start : end]
