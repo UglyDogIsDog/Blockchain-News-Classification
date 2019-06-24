@@ -44,12 +44,15 @@ class CustomDataset(Dataset):
         #pos_num, neg_num = 0, 0
         #pos_index = []
         #neg_index = []
-        for passage in passages:
+        for passage in passages[begin, end]:
             pass_sen = cut_para(passage["passage"])
             self.start += [len(sens)]
             sens += pass_sen
             self.end += [len(sens)]
-            self.label += [passage["label"]]
+            if end == None:
+                self.label += [passage["label"]]
+            else:
+                self.label += [0]
         inp.close()
         self.data = be.encode(sens)
         torch.save(torch.FloatTensor(self.data), path + ".dat")

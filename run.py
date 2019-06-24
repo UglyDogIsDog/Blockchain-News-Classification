@@ -1,5 +1,6 @@
 import sys
 import argparse
+import json
 import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
@@ -81,8 +82,10 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=100)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
-    parser.add_argument("-ct", "--check_time", type=int, default=3)
-    parser.add_argument("-sn", "--sen_num", type=int, default=128)
+    parser.add_argument("-ct", "--check_time", type=int, default=1)
+    parser.add_argument("-sn", "--sen_num", type=int, default=200)
+    parser.add_argument("-tm", "--train_model", type=bool, default=False)
+    parser.add_argument("-s", "--step", type=int, default=10)
     args = parser.parse_args()
 
     #use CUDA to speed up
@@ -101,7 +104,7 @@ if __name__ == "__main__":
     learning_rate = args.learning_rate
     optimizer = torch.optim.Adam(list(lstm.parameters()) + list(mlp.parameters()), lr=learning_rate, weight_decay=args.regularization)
 
-    def run(data_loader, update_model):
+    def run(data_loader, update_model, predict=False):
         total_num = 0
         right_num = 0
         true_pos = 0
@@ -147,6 +150,9 @@ if __name__ == "__main__":
         pred[pred_sum > (iteration * 1.0 / 2)] = 1
         labels = targ
 
+        if predict:
+            return pred.cpu()
+
         right_num += labels[pred == labels].size(0)
         total_num += labels.size(0)
         true_pos += labels[(labels == 1) & (pred == labels)].size(0)
@@ -175,30 +181,41 @@ if __name__ == "__main__":
             print()
         return None
 
-    #train
-    F1_max = 0
     
-    lstm.load_state_dict(torch.load("lstm.pk"))
-    lstm.eval()
-    mlp.load_state_dict(torch.load("mlp.pk"))
-    mlp.eval()
-    for epoch in range(args.epoch):
-        print("epoch:{}".format(epoch + 1))
-        #run(data_loader=train_loader, update_model=True)
-        F1 = run(data_loader=dev_loader, update_model=False)
+    if args.train_model: # train model
+        F1_max = 0
+        for epoch in range(args.epoch):
+            print("epoch:{}".format(epoch + 1))
+            run(data_loader=train_loader, update_model=True)
+            F1 = run(data_loader=dev_loader, update_model=False)
+            
+            if F1 > F1_max:
+                torch.save(lstm.state_dict(), "lstm.pk")
+                torch.save(mlp.state_dict(), "mlp.pk")
+                print("F1: {} saved".format(F1))
+                F1_max = F1
+    else: # run unlabled data
+        lstm.load_state_dict(torch.load("lstm.pk"))
+        lstm.eval()
+        mlp.load_state_dict(torch.load("mlp.pk"))
+        mlp.eval()
+
+        inp = open("data.json", "r", encoding="utf-8")
+        passages = json.load(inp)
+        number = len(passages)
+        inp.close()
+
+        for begin in range(0, number, args.step):
+            test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, begin=begin, end=begin + args.step), batch_size = args.batch_size, shuffle = False)
+            pred = run(data_loader=test_loader, update_model=False, predict=True)
+            inp = open("data.json", "r", encoding="utf-8")
+            passages = json.load(inp)
+            for i in range(args.step):
+                print(pred[i].data())
+                passages[begin + i]['label'] = pred[i].data()
+            inp.close()
         
-        '''
-        if F1 > F1_max:
-            torch.save(lstm.state_dict(), "lstm.pk")
-            torch.save(mlp.state_dict(), "mlp.pk")
-            print("F1: {} saved".format(F1))
-            F1_max = F1
-        '''
-        #if (epoch + 1) % args.decay_epoch == 0:
-        #    learning_rate /= 2
-        #    print("lr: {}".format(learning_rate))
-        #    optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate, weight_decay=args.regularization)
-'''
+    '''
     #train
     for epoch in range(args.epoch):
         #if epoch % 5 == 0:
