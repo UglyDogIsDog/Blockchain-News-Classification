@@ -94,7 +94,7 @@ if __name__ == "__main__":
         lstm = lstm.cuda()
         mlp = mlp.cuda()
     learning_rate = args.learning_rate
-    optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate, weight_decay=args.regularization)
+    optimizer = torch.optim.Adam(list(lstm.parameters()) + list(mlp.parameters()), lr=learning_rate, weight_decay=args.regularization)
 
     def run(data_loader, update_model):
         total_num = 0
