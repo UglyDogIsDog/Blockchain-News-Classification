@@ -41,7 +41,7 @@ if __name__ == "__main__":
             test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
             vec, lens, label = data
-            print(vec.shape)
+            #print(vec.shape)
             if use_cuda:
                 vec = vec.cuda()
                 label = label.cuda()
