@@ -18,7 +18,7 @@ def cut_para(para):
     para = re.sub('(\…{2})([^”’])', r"\1\n\2", para)
     para = re.sub('([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
     para = para.strip()  # remove both sizes' blanks
-    return [sen for sen in para.split("\n") if len(sen) >= MIN_SEN_LEN]
+    return [sen.strip() for sen in para.split("\n") if len(sen.strip()) >= MIN_SEN_LEN]
 
 #customized loading data
 class CustomDataset(Dataset):
