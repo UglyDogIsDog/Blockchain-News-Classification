@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.nn.utils import clip_grad_norm_
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-from database import CustomDataset, SEN_NUM
+from database import CustomDataset #, SEN_NUM
 #from model import CNN_Text, test
 
 #BERT_MAX_SEQ_LEN = 64
@@ -17,7 +17,7 @@ class LSTM_model(nn.Module):
     def __init__(self):
         super(LSTM_model, self).__init__()
         self.lstm = nn.LSTM(768, args.hidden_layer, num_layers=2, bidirectional=True)
-        self.pooling = nn.MaxPool1d(SEN_NUM)
+        self.pooling = nn.MaxPool1d(args.sen_num)
 
     def forward(self, sens, lens):
         lens, perm_idx = lens.sort(0, descending=True)
@@ -77,14 +77,15 @@ if __name__ == "__main__":
     parser.add_argument("-hl", "--hidden_layer", type=int, default=200)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
     parser.add_argument("-ct", "--check_time", type=int, default=3)
+    parser.add_argument("-sn", "--sen_num", type=int, default=128)
     args = parser.parse_args()
 
     #use CUDA to speed up
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", balance=False), batch_size = args.batch_size, shuffle = True)#, collate_fn=collate_wrapper, pin_memory=True)
-    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", balance=False), batch_size = args.batch_size, shuffle = False)#, collate_fn=collate_wrapper, pin_memory=True)
+    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", sen_num=args.sen_num, balance=False), batch_size = args.batch_size, shuffle = True)#, collate_fn=collate_wrapper, pin_memory=True)
+    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, balance=False), batch_size = args.batch_size, shuffle = False)#, collate_fn=collate_wrapper, pin_memory=True)
 
     #initialize model
     lstm = LSTM_model()
@@ -123,7 +124,7 @@ if __name__ == "__main__":
                     loss.backward()
                     clip_grad_norm_(lstm.parameters(), args.clip)
                     optimizer.step()
-                print(lens[labels != torch.max(score, 1)[1]])
+                #print(lens[labels != torch.max(score, 1)[1]])
                 if step == 0:
                     pred = torch.max(score, 1)[1]
                     targ = labels

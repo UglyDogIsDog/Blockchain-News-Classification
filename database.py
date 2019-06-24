@@ -8,7 +8,7 @@ from torch.utils.data.dataset import Dataset
 from bert_serving.client import BertClient
 
 CLIENT_BATCH_SIZE = 4096
-SEN_NUM = 128
+#SEN_NUM = 128
 MIN_SEN_LEN = 5
 
 #cut paragraph to sentences
@@ -22,12 +22,13 @@ def cut_para(para):
 
 #customized loading data
 class CustomDataset(Dataset):
-    def __init__(self, path, balance):
+    def __init__(self, path, sen_num, balance):
         if os.path.isfile(path + ".end"):    
             self.data = torch.load(path + ".dat")
             self.label = torch.load(path + ".lab")
             self.start = torch.load(path + ".sta")
             self.end = torch.load(path + ".end")
+            self.sen_num = sen_num
             return
         
 
@@ -115,6 +116,7 @@ class CustomDataset(Dataset):
         
 
     def __getitem__(self, index):
+        SEN_NUM = self.sen_num
         if self.end[index] - self.start[index] <= SEN_NUM:
             para = self.data[self.start[index] : self.end[index]]
             length = self.end[index] - self.start[index]
