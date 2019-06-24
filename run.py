@@ -211,8 +211,8 @@ if __name__ == "__main__":
             inp = open("test.json", "r", encoding="utf-8")
             passages = json.load(inp)
             for i in range(args.step):
-                print(pred[i].data())
-                passages[begin + i]['label'] = pred[i].data()
+                print(pred[i].item())
+                passages[begin + i]['label'] = pred[i].item()
             inp.close()
         
     '''
