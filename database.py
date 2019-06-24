@@ -8,7 +8,8 @@ from torch.utils.data.dataset import Dataset
 from bert_serving.client import BertClient
 
 CLIENT_BATCH_SIZE = 4096
-SEN_NUM = 64
+SEN_NUM = 40
+MIN_SEN_LEN = 5
 
 #cut paragraph to sentences
 def cut_para(para):
@@ -17,14 +18,16 @@ def cut_para(para):
     para = re.sub('(\…{2})([^”’])', r"\1\n\2", para)
     para = re.sub('([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
     para = para.strip()  # remove both sizes' blanks
-    return para.split("\n")
+    return [sen for sen in para.split("\n") if len(sen) >= MIN_SEN_LEN]
 
 #customized loading data
 class CustomDataset(Dataset):
     def __init__(self, path, balance):
-        if os.path.isfile(path + ".dat") and os.path.isfile(path + ".lab"):    
+        if os.path.isfile(path + ".end"):    
             self.data = torch.load(path + ".dat")
             self.label = torch.load(path + ".lab")
+            self.start = torch.load(path + ".sta")
+            self.end = torch.load(path + ".end")
             return
         
 
@@ -35,11 +38,25 @@ class CustomDataset(Dataset):
         passages = json.load(inp)
         sens = []
         self.label = []
-        pos_num, neg_num = 0, 0
-        pos_index = []
-        neg_index = []
+        self.start = []
+        self.end = []
+        #pos_num, neg_num = 0, 0
+        #pos_index = []
+        #neg_index = []
         for passage in passages:
             pass_sen = cut_para(passage["passage"])
+            self.start += [len(sens)]
+            sens += pass_sen
+            self.end += [len(sens)]
+            self.label += [passage["label"]]
+        inp.close()
+        self.data = be.encode(sens)
+        torch.save(torch.FloatTensor(self.data), path + ".dat")
+        torch.save(self.label, path + ".lab")
+        torch.save(self.start, path + ".sta")
+        torch.save(self.end, path + ".end")
+
+        '''
             if len(pass_sen) < SEN_NUM:
                 pass_sen += ["x"] * (SEN_NUM - len(pass_sen))
             for i in range(SEN_NUM):
@@ -61,9 +78,10 @@ class CustomDataset(Dataset):
                 neg_num += 1
                 neg_index += [len(self.label)]
                 self.label += [0]
+        '''
 
-        inp.close()
-            
+        
+        '''
         #send sentences to BERT-as-service, get each sentences' vector of size 768
         if balance:
             self.data = np.empty((len(sens) + abs(neg_num - pos_num) * SEN_NUM, 768), dtype=np.float32)
@@ -93,12 +111,22 @@ class CustomDataset(Dataset):
                 self.label.append(0)
                 neg_num += 1
                 last_num += 1
+        '''
         
-        torch.save(torch.FloatTensor(self.data), path + ".dat")
-        torch.save(self.label, path + ".lab")
 
     def __getitem__(self, index):
-        return self.data[index], self.label[index]
+        if self.end[index] - self.start[index] <= SEN_NUM:
+            para = self.data[self.start[index] : self.end[index]]
+            length = self.end[index] - self.start[index]
+            para = torch.cat((para, torch.zeros((SEN_NUM - (self.end[index] - self.start[index]), 768))), dim=0)
+            #print(para.shape)
+        else:
+            start = random.randint(0, self.end[index] - SEN_NUM)
+            end = start + SEN_NUM
+            length = SEN_NUM
+            para = self.data[start : end]
+            
+        return para, length, self.label[index]
 
     def __len__(self):
-        return self.data.shape[0]
+        return len(self.label)

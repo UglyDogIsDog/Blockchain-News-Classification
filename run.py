@@ -39,7 +39,7 @@ if __name__ == "__main__":
         if epoch % 5 == 0:
             test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
-            vec, label = data
+            vec, lens, label = data
             if use_cuda:
                 vec = vec.cuda()
                 label = label.cuda()

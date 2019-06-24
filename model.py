@@ -54,7 +54,7 @@ def test(cnn, test_loader, use_cuda):
     right_pos, total_pos = 0, 0
     for step, data in enumerate(test_loader):
         
-        vec, label = data
+        vec, lens, label = data
         if use_cuda:
             vec = vec.cuda()
             label = label.cuda()
