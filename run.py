@@ -25,7 +25,7 @@ class LSTM_model(nn.Module):
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
         sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
         o, (h, c) = self.lstm(sens) # o: L * B * 2V
-        o = pad_packed_sequence(o, batch_first=False, padding_value=0.0, total_length=None)[0] # <L * B * 2V
+        o = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # <L * B * 2V
 
         h = self.pooling(o.permute(1, 2, 0)).squeeze(2) # B * 2V
         _, unperm_idx = perm_idx.sort(0)
