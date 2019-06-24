@@ -25,7 +25,7 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=True), batch_size = BATCH_SIZE, shuffle = True)
+    train_loader = Data.DataLoader(dataset = CustomDataset(path="train.json", balance=False), batch_size = BATCH_SIZE, shuffle = True)
     test_loader = Data.DataLoader(dataset = CustomDataset(path="test.json", balance=False), batch_size = BATCH_SIZE, shuffle = True)
 
     #initialize model
@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
     #train
     for epoch in range(EPOCH):
+        print("epoch :")
         if epoch % 5 == 0:
             test(cnn, test_loader, use_cuda)
         for step, data in enumerate(train_loader):
