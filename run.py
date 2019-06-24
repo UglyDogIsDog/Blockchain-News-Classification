@@ -38,7 +38,7 @@ class MLP_model(nn.Module):
         self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer // 2) 
         self.linear2 = nn.Linear(args.hidden_layer // 2, args.hidden_layer // 4)
         self.linear3 = nn.Linear(args.hidden_layer // 4, 2)
-        self.dropout = nn.Dropout(0)
+        self.dropout = nn.Dropout(0.5)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, f):
