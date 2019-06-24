@@ -202,10 +202,14 @@ if __name__ == "__main__":
 
         inp = open("test.json", "r", encoding="utf-8")
         passages = json.load(inp)
-        number = len(passages)
+        end = len(passages)
+        for begin in range(0, end, args.step):
+            if passages[begin].get("label", None) == None:
+                break
+        start = begin
         inp.close()
 
-        for begin in range(0, number, args.step):
+        for begin in range(start, end, args.step):
             test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, begin=begin, end=begin + args.step), batch_size = args.batch_size, shuffle = False)
             pred = run(data_loader=test_loader, update_model=False, predict=True)
             inp = open("test.json", "r", encoding="utf-8")
@@ -219,7 +223,7 @@ if __name__ == "__main__":
             outp.write(json.dumps(passages, indent=4, ensure_ascii=False))
             outp.close()
 
-            print("{}/{}".format(begin, number))
+            print("{}/{}".format(begin, end))
         
     '''
     #train
