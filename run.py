@@ -35,9 +35,9 @@ class LSTM_model(nn.Module):
 class MLP_model(nn.Module):
     def __init__(self):
         super(MLP_model, self).__init__()
-        self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer * 2) 
-        self.linear2 = nn.Linear(args.hidden_layer * 2, args.hidden_layer // 2)
-        self.linear3 = nn.Linear(args.hidden_layer // 2, 2)
+        self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer // 2) 
+        self.linear2 = nn.Linear(args.hidden_layer // 2, args.hidden_layer // 4)
+        self.linear3 = nn.Linear(args.hidden_layer // 4, 2)
         self.dropout = nn.Dropout(0)
         self.softmax = nn.Softmax(dim=1)
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
-    parser.add_argument("-r", "--regularization", type=float, default=0.0005) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.0001) #normally 0.0005
 
     # relatively loose hyperparameters
     parser.add_argument("-e", "--epoch", type=int, default=5000)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=200)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
-    parser.add_argument("-ct", "--check_time", type=int, default=3)
+    parser.add_argument("-ct", "--check_time", type=int, default=5)
     args = parser.parse_args()
 
     #use CUDA to speed up
