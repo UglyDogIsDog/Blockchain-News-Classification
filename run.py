@@ -25,11 +25,14 @@ class LSTM_model(nn.Module):
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
         sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
         o, (h, c) = self.lstm(sens) # o: <L * B * 2V
-        o = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V
-        
-        h = torch.div(torch.sum(o, dim=0).permute(1, 0), lens.to(dtype=torch.float)).permute(1, 0) # B * 2V
 
-        #h = self.pooling(o.permute(1, 2, 0)).squeeze(2) # B * 2V
+        o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
+        h_max = self.pooling(o.permute(1, 2, 0)).squeeze(2) # B * 2V
+
+        o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V
+        h_avg = torch.div(torch.sum(o, dim=0).permute(1, 0), lens.to(dtype=torch.float)).permute(1, 0) # B * 2V
+
+        h = torch.cat((h_max, h_avg), dim=1) # B * 4V
         _, unperm_idx = perm_idx.sort(0)
         h = h[unperm_idx]
         return h
@@ -37,7 +40,7 @@ class LSTM_model(nn.Module):
 class MLP_model(nn.Module):
     def __init__(self):
         super(MLP_model, self).__init__()
-        self.linear1 = nn.Linear(args.hidden_layer * 2, args.hidden_layer // 2) 
+        self.linear1 = nn.Linear(args.hidden_layer * 4, args.hidden_layer // 2) 
         self.linear2 = nn.Linear(args.hidden_layer // 2, args.hidden_layer // 4)
         self.linear3 = nn.Linear(args.hidden_layer // 4, 2)
         self.dropout = nn.Dropout(0.5)
