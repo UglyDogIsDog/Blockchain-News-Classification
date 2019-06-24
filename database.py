@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
         #pos_num, neg_num = 0, 0
         #pos_index = []
         #neg_index = []
-        for passage in passages[begin, end]:
+        for passage in passages[begin : end]:
             pass_sen = cut_para(passage["passage"])
             self.start += [len(sens)]
             sens += pass_sen
