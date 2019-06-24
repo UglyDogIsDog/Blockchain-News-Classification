@@ -8,7 +8,7 @@ from torch.utils.data.dataset import Dataset
 from bert_serving.client import BertClient
 
 CLIENT_BATCH_SIZE = 4096
-SEN_NUM = 256
+SEN_NUM = 128
 MIN_SEN_LEN = 5
 
 #cut paragraph to sentences

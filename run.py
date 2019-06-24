@@ -108,7 +108,7 @@ if __name__ == "__main__":
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
                 sens, lens, labels = data
-                print(lens)
+                #print(lens)
                 if use_cuda:
                     sens = sens.cuda()
                     lens = lens.cuda()
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                     loss.backward()
                     clip_grad_norm_(lstm.parameters(), args.clip)
                     optimizer.step()
-                
+                print(lens[labels != torch.max(score, 1)[1]])
                 if step == 0:
                     pred = torch.max(score, 1)[1]
                     targ = labels
