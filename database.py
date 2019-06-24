@@ -123,8 +123,8 @@ class CustomDataset(Dataset):
             para = torch.cat((para, torch.zeros((SEN_NUM - (self.end[index] - self.start[index]), 768))), dim=0)
             #print(para.shape)
         else:
-            start = random.randint(0, self.end[index] - SEN_NUM)
-            print(start)
+            start = random.randint(self.start[index], self.end[index] - SEN_NUM)
+            #print(start)
             end = start + SEN_NUM
             length = SEN_NUM
             para = self.data[start : end]
