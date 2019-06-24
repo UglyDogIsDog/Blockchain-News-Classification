@@ -49,6 +49,8 @@ class CustomDataset(Dataset):
             pass_sen = cut_para(passage["passage"])
             if len(pass_sen) == 0:
                 pass_sen = ['x']
+            if len(pass_sen) > 2 * sen_num:
+                pass_sen = pass_sen[0 : 2 * sen_num]
             self.start += [len(sens)]
             sens += pass_sen
             self.end += [len(sens)]
