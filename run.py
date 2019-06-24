@@ -200,7 +200,7 @@ if __name__ == "__main__":
         mlp.load_state_dict(torch.load("mlp.pk"))
         mlp.eval()
 
-        inp = open("data.json", "r", encoding="utf-8")
+        inp = open("test.json", "r", encoding="utf-8")
         passages = json.load(inp)
         number = len(passages)
         inp.close()
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         for begin in range(0, number, args.step):
             test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, begin=begin, end=begin + args.step), batch_size = args.batch_size, shuffle = False)
             pred = run(data_loader=test_loader, update_model=False, predict=True)
-            inp = open("data.json", "r", encoding="utf-8")
+            inp = open("test.json", "r", encoding="utf-8")
             passages = json.load(inp)
             for i in range(args.step):
                 print(pred[i].data())
