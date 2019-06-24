@@ -89,8 +89,8 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
 
     #get data
-    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", sen_num=args.sen_num, balance=False), batch_size = args.batch_size, shuffle = True)#, collate_fn=collate_wrapper, pin_memory=True)
-    dev_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, balance=False), batch_size = args.batch_size, shuffle = False)#, collate_fn=collate_wrapper, pin_memory=True)
+    train_loader = Data.DataLoader(dataset=CustomDataset(path="train.json", sen_num=args.sen_num), batch_size = args.batch_size, shuffle = True)#, collate_fn=collate_wrapper, pin_memory=True)
+    dev_loader = Data.DataLoader(dataset=CustomDataset(path="dev.json", sen_num=args.sen_num), batch_size = args.batch_size, shuffle = False)#, collate_fn=collate_wrapper, pin_memory=True)
 
     #initialize model
     lstm = LSTM_model()
@@ -170,14 +170,22 @@ if __name__ == "__main__":
         if pos > 0 and true > 0 and (precision + recall) > 0:
             F1 = 2.0 * precision * recall / (precision + recall)
             print("F1: {} ".format(F1))
+            return F1
         else:
             print()
+        return None
 
     #train
+    F1_max = 0
     for epoch in range(args.epoch):
         print("epoch:{}".format(epoch + 1))
         run(data_loader=train_loader, update_model=True)
-        run(data_loader=dev_loader, update_model=False)
+        F1 = run(data_loader=dev_loader, update_model=False)
+        if F1 > F1_max:
+            torch.save(lstm.state_dict(), "lstm.pk")
+            torch.save(mlp.state_dict(), "mlp.pk")
+            print("F1: {} saved".format(F1))
+            F1_max = F1
         #if (epoch + 1) % args.decay_epoch == 0:
         #    learning_rate /= 2
         #    print("lr: {}".format(learning_rate))

@@ -22,8 +22,8 @@ def cut_para(para):
 
 #customized loading data
 class CustomDataset(Dataset):
-    def __init__(self, path, sen_num, balance):
-        if os.path.isfile(path + ".end"):    
+    def __init__(self, path, sen_num, begin=0, end=None):
+        if end == None and os.path.isfile(path + ".end"):    
             self.data = torch.load(path + ".dat")
             self.label = torch.load(path + ".lab")
             self.start = torch.load(path + ".sta")
