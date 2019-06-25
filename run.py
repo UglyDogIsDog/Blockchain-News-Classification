@@ -214,7 +214,7 @@ if __name__ == "__main__":
             pred = run(data_loader=test_loader, update_model=False, predict=True)
             inp = open("test.json", "r", encoding="utf-8")
             passages = json.load(inp)
-            for i in range(args.step):
+            for i in range(pred.shape[0]):
                 #print(pred[i].item())
                 passages[begin + i]['label'] = pred[i].item()
             inp.close()
