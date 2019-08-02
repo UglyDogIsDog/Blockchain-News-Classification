@@ -181,7 +181,7 @@ if __name__ == "__main__":
             print()
         return None
 
-    
+    print(args.train_model) #test
     if args.train_model: # train model
         F1_max = 0
         for epoch in range(args.epoch):
