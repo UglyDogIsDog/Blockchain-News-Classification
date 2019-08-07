@@ -31,7 +31,7 @@ class LSTM_model(nn.Module):
         o, (h, c) = self.lstm(sens) # o: <L * B * 2V
         print(o.shape,h.shape,c.shape)
         o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
-        print('o_max:{}'.format(o_max.shape)
+        print('o_max:{}'.format(o_max.shape))
         h_max = self.pooling(o_max.permute(1, 2, 0)).squeeze(2) # B * 2V
         print('h_max:{}'.format(h_max.shape)
         o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V   
