@@ -22,15 +22,19 @@ class LSTM_model(nn.Module):
 
     def forward(self, sens, lens):
         lens, perm_idx = lens.sort(0, descending=True)
+        print(perm_idx)
+        print(lens)
         sens = sens[perm_idx]
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
         sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
+        print('after pack:{}'.format(sens.shape))
         o, (h, c) = self.lstm(sens) # o: <L * B * 2V
-
+        print(o.shape,h.shape,c.shape)
         o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
+        print('o_max:{}'.format(o_max.shape)
         h_max = self.pooling(o_max.permute(1, 2, 0)).squeeze(2) # B * 2V
-
-        o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V
+        print('h_max:{}'.format(h_max.shape)
+        o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V   
         h_avg = torch.div(torch.sum(o_avg, dim=0).permute(1, 0), lens.to(dtype=torch.float)).permute(1, 0) # B * 2V
 
         h = torch.cat((h_max, h_avg), dim=1) # B * 4V
@@ -118,7 +122,7 @@ if __name__ == "__main__":
             for step, data in enumerate(data_loader):
                 print(step)
                 sens, lens, labels = data
-                print('Sen_dim: {}'.format(sens.shape))
+                #print('Sen_dim: {}'.format(sens.shape))
                 #print('len:{}'.format(lens))
                 if use_cuda:
                     sens = sens.cuda()
