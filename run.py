@@ -116,9 +116,10 @@ if __name__ == "__main__":
 
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
+                print(step)
                 sens, lens, labels = data
-                print('Sen_dim: {}'.format(sens.size))
-                print('len:{}'.format(lens))
+                print('Sen_dim: {}'.format(sens.shape))
+                #print('len:{}'.format(lens))
                 if use_cuda:
                     sens = sens.cuda()
                     lens = lens.cuda()
