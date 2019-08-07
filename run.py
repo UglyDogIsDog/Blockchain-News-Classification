@@ -117,12 +117,14 @@ if __name__ == "__main__":
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
                 sens, lens, labels = data
-                #print(lens)
+                print('Sen_dim: {}'.format(sens.size))
+                print('len:{}'.format(lens))
                 if use_cuda:
                     sens = sens.cuda()
                     lens = lens.cuda()
                     labels = labels.cuda()
                 h = lstm(sens, lens)
+                print(h.shape) #see dimension
                 score = mlp(h) # B * Labels
 
                 if update_model:
@@ -181,7 +183,7 @@ if __name__ == "__main__":
             print()
         return None
 
-    print(args.train_model) #test
+    
     if args.train_model: # train model
         F1_max = 0
         for epoch in range(args.epoch):
