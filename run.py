@@ -33,7 +33,7 @@ class LSTM_model(nn.Module):
         o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
         print('o_max:{}'.format(o_max.shape))
         h_max = self.pooling(o_max.permute(1, 2, 0)).squeeze(2) # B * 2V
-        print('h_max:{}'.format(h_max.shape)
+        print('h_max:{}'.format(h_max.shape))
         o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V   
         h_avg = torch.div(torch.sum(o_avg, dim=0).permute(1, 0), lens.to(dtype=torch.float)).permute(1, 0) # B * 2V
 
