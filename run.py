@@ -124,6 +124,7 @@ if __name__ == "__main__":
                     sens = sens.cuda()
                     lens = lens.cuda()
                     labels = labels.cuda()
+                print('input_dim:{}'.format(sens.shape))
                 h = lstm(sens, lens)
                 print(h.shape) #see dimension
                 score = mlp(h) # B * Labels

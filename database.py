@@ -20,6 +20,10 @@ def cut_para(para):
     para = para.strip()  # remove both sizes' blanks
     return [sen.strip() for sen in para.split("\n") if len(sen.strip()) >= MIN_SEN_LEN]
 
+'''
+begin/end use as label to divide paras@@
+'''
+
 #customized loading data
 class CustomDataset(Dataset):
     def __init__(self, path, sen_num, begin=0, end=None):
@@ -59,7 +63,7 @@ class CustomDataset(Dataset):
             else:
                 self.label += [0]
         inp.close()
-        self.data = be.encode(sens)
+        self.data = be.encode(sens) #every senetcne an encoding vector
         self.data = torch.FloatTensor(self.data)
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
