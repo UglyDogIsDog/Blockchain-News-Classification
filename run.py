@@ -28,9 +28,9 @@ class LSTM_model(nn.Module):
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
         sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
         o, (h, c) = self.lstm(sens) # o: <L * B * 2V
-        print(o.type)
-        print(h.shape)
-        print(c.shape)
+        print(type(o))
+        print(type(h))
+        print(type(c))
         o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
         print('o_max:{}'.format(o_max.shape))
         h_max = self.pooling(o_max.permute(1, 2, 0)).squeeze(2) # B * 2V
