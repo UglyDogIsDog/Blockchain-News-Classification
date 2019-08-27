@@ -57,6 +57,7 @@ class MLP_model(nn.Module):
         f = F.relu(self.dropout(F.relu(self.linear1(f))))
         #f = F.relu(self.dropout(F.relu(self.linear2(f))))
         f = self.linear3(f)
+        f = self.softmax(f)
         return f #self.softmax(f)
 '''
 class SimpleCustomBatch:
@@ -122,7 +123,7 @@ if __name__ == "__main__":
 
         for ite in range(iteration):
             for step, data in enumerate(data_loader):
-                print(step)
+                #print(step)
                 sens, lens, labels = data
                 #print('Sen_dim: {}'.format(sens.shape))
                 #print('len:{}'.format(lens))
