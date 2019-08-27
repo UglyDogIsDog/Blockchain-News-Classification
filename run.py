@@ -57,7 +57,7 @@ class MLP_model(nn.Module):
         f = F.relu(self.dropout(F.relu(self.linear1(f))))
         #f = F.relu(self.dropout(F.relu(self.linear2(f))))
         f = self.linear3(f)
-        #f = self.softmax(f)
+        f = self.softmax(f)
         return f #self.softmax(f)
 '''
 class SimpleCustomBatch:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
                     targ = torch.cat((targ, labels), dim=0)
                     val = torch.cat((val,score),dim = 0)
                     print(val.shape)
-                    print(val)
+                    #print(val)
             if ite == 0:
                 pred_sum = pred
             else:
