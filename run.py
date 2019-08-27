@@ -57,7 +57,7 @@ class MLP_model(nn.Module):
         f = F.relu(self.dropout(F.relu(self.linear1(f))))
         #f = F.relu(self.dropout(F.relu(self.linear2(f))))
         f = self.linear3(f)
-        f = self.softmax(f)
+        #f = self.softmax(f)
         return f #self.softmax(f)
 '''
 class SimpleCustomBatch:
@@ -146,12 +146,16 @@ if __name__ == "__main__":
                 #print(lens[labels != torch.max(score, 1)[1]])
                 if step == 0:
                     pred = torch.max(score, 1)[1]
-                    print(score)
-                    print(pred)
+                    val = score #semantic value 
+                    #print(score)
+                    #print(pred)
                     targ = labels
                 else:
                     pred = torch.cat((pred, torch.max(score, 1)[1]), dim=0)
                     targ = torch.cat((targ, labels), dim=0)
+                    val = torch.cat((val,score),dim = 0)
+                    print(val.shape)
+                    print(val)
             if ite == 0:
                 pred_sum = pred
             else:
@@ -161,7 +165,7 @@ if __name__ == "__main__":
         if use_cuda:
             pred = pred.cuda()
         pred[pred_sum > (iteration * 1.0 / 2)] = 1
-        val = pred_sum/iteration #semantic value
+        #val = pred_sum/iteration #semantic value
         labels = targ
 
         if predict:
