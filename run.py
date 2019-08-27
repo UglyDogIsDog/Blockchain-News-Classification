@@ -22,21 +22,21 @@ class LSTM_model(nn.Module):
 
     def forward(self, sens, lens):
         lens, perm_idx = lens.sort(0, descending=True)
-        print(perm_idx)
-        print(lens)
+        #print(perm_idx)
+        #print(lens)
         sens = sens[perm_idx]
         sens = sens.permute(1, 0, 2) # B * L * V -> L * B * V
         sens = pack_padded_sequence(sens, lens, batch_first=False, enforce_sorted=True)
         o, (h, c) = self.lstm(sens) # o: <L * B * 2V
         #print(type(o))
-        print('h:{}'.format(h.shape))
-        print('c:{}'.format(c.shape))
+        #print('h:{}'.format(h.shape))
+        #print('c:{}'.format(c.shape))
         o_max = pad_packed_sequence(o, batch_first=False, padding_value=float("-inf"), total_length=None)[0] # L * B * 2V
-        print('o_max:{}'.format(o_max.shape))
+        #print('o_max:{}'.format(o_max.shape))
         h_max = self.pooling(o_max.permute(1, 2, 0)).squeeze(2) # B * 2V
-        print('h_max:{}'.format(h_max.shape))
+        #print('h_max:{}'.format(h_max.shape))
         o_avg = pad_packed_sequence(o, batch_first=False, padding_value=0, total_length=None)[0] # L * B * 2V   
-        print('o_avg:{}'.format(o_avg.shape))
+        #print('o_avg:{}'.format(o_avg.shape))
         h_avg = torch.div(torch.sum(o_avg, dim=0).permute(1, 0), lens.to(dtype=torch.float)).permute(1, 0) # B * 2V
 
         h = torch.cat((h_max, h_avg), dim=1) # B * 4V
@@ -130,9 +130,9 @@ if __name__ == "__main__":
                     sens = sens.cuda()
                     lens = lens.cuda()
                     labels = labels.cuda()
-                print('input_dim:{}'.format(sens.shape))
+                #print('input_dim:{}'.format(sens.shape))
                 h = lstm(sens, lens)
-                print(h.shape) #see dimension
+                #print(h.shape) #see dimension
                 score = mlp(h) # B * Labels
 
                 if update_model:
@@ -145,6 +145,8 @@ if __name__ == "__main__":
                 #print(lens[labels != torch.max(score, 1)[1]])
                 if step == 0:
                     pred = torch.max(score, 1)[1]
+                    print(score)
+                    print(pred)
                     targ = labels
                 else:
                     pred = torch.cat((pred, torch.max(score, 1)[1]), dim=0)
@@ -158,10 +160,11 @@ if __name__ == "__main__":
         if use_cuda:
             pred = pred.cuda()
         pred[pred_sum > (iteration * 1.0 / 2)] = 1
+        val = pred_sum/iteration #semantic value
         labels = targ
 
         if predict:
-            return pred.cpu()
+            return pred.cpu(),val.cpu()
 
         right_num += labels[pred == labels].size(0)
         total_num += labels.size(0)
@@ -221,12 +224,13 @@ if __name__ == "__main__":
 
         for begin in range(start, end, args.step):
             test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, begin=begin, end=begin + args.step), batch_size = args.batch_size, shuffle = False)
-            pred = run(data_loader=test_loader, update_model=False, predict=True)
+            pred,val = run(data_loader=test_loader, update_model=False, predict=True)
             inp = open("test.json", "r", encoding="utf-8")
             passages = json.load(inp)
             for i in range(pred.shape[0]):
                 #print(pred[i].item())
                 passages[begin + i]['label'] = pred[i].item()
+                passages[begin + i]['semantic_value'] = val[i].item()
             inp.close()
 
             outp = open("test.json", 'w', encoding="utf-8")
