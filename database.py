@@ -63,6 +63,7 @@ class CustomDataset(Dataset):
             else:
                 self.label += [0]
         inp.close()
+        print('begin incoding')
         self.data = be.encode(sens) #every senetcne an encoding vector
         self.data = torch.FloatTensor(self.data)
         torch.save(self.data, path + ".dat")
