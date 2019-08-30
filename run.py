@@ -237,7 +237,7 @@ if __name__ == "__main__":
             for i in range(pred.shape[0]):
                 #print(pred[i].item())
                 passages[begin + i]['label'] = pred[i].item()
-                passages[begin + i]['semantic_value'] = val[i].detach().numpy()
+                passages[begin + i]['semantic_value'] = val[i].detach().numpy().tolist()
             inp.close()
 
             outp = open("test.json", 'w', encoding="utf-8")
