@@ -1,6 +1,8 @@
 import sys
 import argparse
 import json
+import numpy as np
+
 import torch
 import torch.utils.data as Data
 import torch.nn.functional as F
@@ -235,7 +237,7 @@ if __name__ == "__main__":
             for i in range(pred.shape[0]):
                 #print(pred[i].item())
                 passages[begin + i]['label'] = pred[i].item()
-                passages[begin + i]['semantic_value'] = val[i].item()
+                passages[begin + i]['semantic_value'] = np.array(val[i])
             inp.close()
 
             outp = open("test.json", 'w', encoding="utf-8")
