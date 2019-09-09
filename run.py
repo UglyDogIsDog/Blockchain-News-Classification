@@ -93,7 +93,7 @@ if __name__ == "__main__":
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
     parser.add_argument("-ct", "--check_time", type=int, default=1)
     parser.add_argument("-sn", "--sen_num", type=int, default=200)
-    parser.add_argument("-tm", "--train_model", type=bool, default=False)
+    parser.add_argument("-tm", "--train_model", type=bool, default=True)
     parser.add_argument("-s", "--step", type=int, default=256)
     args = parser.parse_args()
 
