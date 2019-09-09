@@ -98,6 +98,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     #use CUDA to speed up
+    print(args.epoch,args.batch_size,args.train_model)
     use_cuda = torch.cuda.is_available()
 
     #get data
