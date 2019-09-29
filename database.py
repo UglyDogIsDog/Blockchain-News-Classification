@@ -6,19 +6,26 @@ import numpy as np
 import torch
 from torch.utils.data.dataset import Dataset
 from bert_serving.client import BertClient
-
+import nltk
 CLIENT_BATCH_SIZE = 4096
 #SEN_NUM = 128
-MIN_SEN_LEN = 5
+MIN_SEN_LEN = 10
 
 #cut paragraph to sentences
+#def cut_para(para):
+#    para = re.sub('([。！？\?])([^”’])', r"\1\n\2", para)
+#    para = re.sub('(\.{6})([^”’])', r"\1\n\2", para)
+#    para = re.sub('(\…{2})([^”’])', r"\1\n\2", para)
+#    para = re.sub('([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
+#    para = para.strip()  # remove both sizes' blanks
+#    return [sen.strip() for sen in para.split("\n") if len(sen.strip()) >= MIN_SEN_LEN]
+
 def cut_para(para):
-    para = re.sub('([。！？\?])([^”’])', r"\1\n\2", para)
-    para = re.sub('(\.{6})([^”’])', r"\1\n\2", para)
-    para = re.sub('(\…{2})([^”’])', r"\1\n\2", para)
-    para = re.sub('([。！？\?][”’])([^，。！？\?])', r'\1\n\2', para)
-    para = para.strip()  # remove both sizes' blanks
-    return [sen.strip() for sen in para.split("\n") if len(sen.strip()) >= MIN_SEN_LEN]
+    nltk.download('punkt')#for tokenize
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    sentences = tokenizer.tokenize(para)
+    sens = [sen.strip() for sen in sentences if len(sen.strip())>=MIN_SEN_LEN]
+    return sens
 
 '''
 begin/end use as label to divide paras@@
