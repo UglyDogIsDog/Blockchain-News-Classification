@@ -237,7 +237,8 @@ if __name__ == "__main__":
             passages = json.load(inp)
             for i in range(pred.shape[0]):
                 #print(pred[i].item())
-                passages[begin + i]['label'] = pred[i].item()
+                if 'label' not in passages.keys():
+                    passages[begin + i]['label'] = pred[i].item()
                 passages[begin + i]['semantic_value'] = val[i].detach().numpy().tolist()
             inp.close()
 
