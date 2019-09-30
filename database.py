@@ -84,6 +84,7 @@ class CustomDataset(Dataset):
         torch.save(self.label, path + ".lab")
         torch.save(self.lens,path + '.lens')
         torch.save(self.sens,path + '.sens')
+        self.cum_len = [0] + list(np.cumsum(np.array(self.lens)))
 #        torch.save(self.start, path + ".sta")
 #        torch.save(self.end, path + ".end")
 
