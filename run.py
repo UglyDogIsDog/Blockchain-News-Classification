@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--clip", type=float, default=1)
     parser.add_argument("-hl", "--hidden_layer", type=int, default=20)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
-    parser.add_argument("-ct", "--check_time", type=int, default=10)
+    parser.add_argument("-ct", "--check_time", type=int, default=1)
     parser.add_argument("-sn", "--sen_num", type=int, default=40)
     parser.add_argument("-tm", "--train_model", type=bool, default=True)
     parser.add_argument("-s", "--step", type=int, default=28)
@@ -140,6 +140,7 @@ if __name__ == "__main__":
                 score = mlp(h) # B * Labels
 
                 if update_model:
+                    print('update model')
                     loss = F.cross_entropy(score, labels)
                     total_loss += loss
                     optimizer.zero_grad()
@@ -211,7 +212,7 @@ if __name__ == "__main__":
             run(data_loader=train_loader, update_model=True)
             F1 = run(data_loader=dev_loader, update_model=False)
             
-            if F1 > F1_max:
+            if F1 and F1 > F1_max:#make sure F1 exist
                 torch.save(lstm.state_dict(), "lstm.pk")
                 torch.save(mlp.state_dict(), "mlp.pk")
                 print("F1: {} saved".format(F1))

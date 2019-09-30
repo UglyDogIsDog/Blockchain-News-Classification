@@ -33,7 +33,7 @@ begin/end use as label to divide paras@@
 
 #customized loading data
 class CustomDataset(Dataset):
-    def __init__(self, path, sen_num, begin=0, end=None,train_model = True):
+    def __init__(self, path, sen_num,train_model = True):
         if os.path.isfile(path + ".dat"):    
             self.data = torch.load(path + ".dat")
             self.label = torch.load(path + ".lab")
