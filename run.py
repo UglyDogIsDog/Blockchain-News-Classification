@@ -83,18 +83,18 @@ if __name__ == "__main__":
     # Hyperparameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3)
-    parser.add_argument("-r", "--regularization", type=float, default=0.001) #normally 0.0005
+    parser.add_argument("-r", "--regularization", type=float, default=0.003) #normally 0.0005
 
     # relatively loose hyperparameters
     parser.add_argument("-e", "--epoch", type=int, default=10)
     parser.add_argument("-bs", "--batch_size", type=int, default=20)
     parser.add_argument("-c", "--clip", type=float, default=1)
-    parser.add_argument("-hl", "--hidden_layer", type=int, default=100)
+    parser.add_argument("-hl", "--hidden_layer", type=int, default=20)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
-    parser.add_argument("-ct", "--check_time", type=int, default=1)
+    parser.add_argument("-ct", "--check_time", type=int, default=10)
     parser.add_argument("-sn", "--sen_num", type=int, default=20)
     parser.add_argument("-tm", "--train_model", type=bool, default=True)
-    parser.add_argument("-s", "--step", type=int, default=256)
+    parser.add_argument("-s", "--step", type=int, default=28)
     args = parser.parse_args()
 
     #use CUDA to speed up
