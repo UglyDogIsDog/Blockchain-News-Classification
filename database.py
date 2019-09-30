@@ -66,9 +66,10 @@ class CustomDataset(Dataset):
                 pass_sen = pass_sen[0 : sen_num]
 #            self.start += [len(sens)]
             self.sens += pass_sen
-            print(self.sens)
+      
 #            self.end += [len(sens)]
             self.lens += [len(pass_sen)]
+            print(len(pass_sen))
             if train_model:
                 self.label += [passage["label"]]
             else:
