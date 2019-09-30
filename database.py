@@ -40,6 +40,7 @@ class CustomDataset(Dataset):
 #            self.start = torch.load(path + ".sta")
 #            self.end = torch.load(path + ".end")
             self.lens = torch.load(path + '.lens')
+            self.cum_len = [0] + list(np.cumsum(np.array(self.lens)))
             self.sens = torch.load(path + '.sens')
             self.sen_num = sen_num
             return
@@ -145,8 +146,10 @@ class CustomDataset(Dataset):
         
 
     def __getitem__(self, index):
-        para = self.data[index]
+#        cum_len = list(np.cumsum(np.array(self.lens)))
+#        cum_len = [0] + cum_len #add zero as the 1st ele
         _len =  self.lens[index]
+        para = self.data[self.cum_len[index]:(self.cum_len[index]+ _len)]
         _sen_num = self.sen_num
         if _len < _sen_num: #add padding
             para = torch.cat((para,torch.zeros((_sen_num - _len),768)),dim = 0)
