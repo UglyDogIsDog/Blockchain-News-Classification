@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument("-hl", "--hidden_layer", type=int, default=20)
     parser.add_argument("-de", "--decay_epoch", type=int, default=20)
     parser.add_argument("-ct", "--check_time", type=int, default=10)
-    parser.add_argument("-sn", "--sen_num", type=int, default=20)
+    parser.add_argument("-sn", "--sen_num", type=int, default=40)
     parser.add_argument("-tm", "--train_model", type=bool, default=True)
     parser.add_argument("-s", "--step", type=int, default=28)
     args = parser.parse_args()
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                     pred = torch.cat((pred, torch.max(score, 1)[1]), dim=0)
                     targ = torch.cat((targ, labels), dim=0)
                     val = torch.cat((val,score),dim = 0)
-                    print(val.shape)
+                    #print(val.shape)
                     #print(val)
             if ite == 0:
                 pred_sum = pred
@@ -204,6 +204,7 @@ if __name__ == "__main__":
 
     
     if args.train_model: # train model
+        print('begin training')
         F1_max = 0
         for epoch in range(args.epoch):
             print("epoch:{}".format(epoch + 1))
@@ -223,30 +224,29 @@ if __name__ == "__main__":
 
         inp = open("test.json", "r", encoding="utf-8")
         passages = json.load(inp)
-        end = len(passages)
-        for begin in range(0, end, args.step):
-            if passages[min(end - 1, begin + args.step - 1)].get("label", None) == None:
-                break
-        start = begin
+#        end = len(passages)
+#        for begin in range(0, end, args.step):
+#            if passages[min(end - 1, begin + args.step - 1)].get("label", None) == None:
+#                break
+#        start = begin
         inp.close()
 
-        for begin in range(start, end, args.step):
-            test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, begin=begin, end=begin + args.step), batch_size = args.batch_size, shuffle = False)
-            pred,val = run(data_loader=test_loader, update_model=False, predict=True)
-            inp = open("test.json", "r", encoding="utf-8")
-            passages = json.load(inp)
-            for i in range(pred.shape[0]):
-                #print(pred[i].item())
-                if 'label' not in passages.keys():
-                    passages[begin + i]['label'] = pred[i].item()
-                passages[begin + i]['semantic_value'] = val[i].detach().numpy().tolist()
-            inp.close()
+        test_loader = Data.DataLoader(dataset=CustomDataset(path="test.json", sen_num=args.sen_num, train_model = False), batch_size = args.batch_size, shuffle = False)
+        pred,val = run(data_loader=test_loader, update_model=False, predict=True)
+        inp = open("test.json", "r", encoding="utf-8")
+        passages = json.load(inp)
+        for i in range(pred.shape[0]):
+            #print(pred[i].item())
+            if 'label' not in passages.keys():
+                passages[i]['label'] = pred[i].item()
+            passages[i]['semantic_value'] = val[i].detach().numpy().tolist() #get real semantics values
+        inp.close()
 
-            outp = open("test.json", 'w', encoding="utf-8")
-            outp.write(json.dumps(passages, indent=4, ensure_ascii=False))
-            outp.close()
+        outp = open("test.json", 'w', encoding="utf-8")
+        outp.write(json.dumps(passages, indent=4, ensure_ascii=False))
+        outp.close()
 
-            print("{}/{}".format(begin, end))
+#        print("{}/{}".format(begin, end))
         
     '''
     #train
