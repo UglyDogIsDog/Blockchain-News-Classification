@@ -40,6 +40,7 @@ class CustomDataset(Dataset):
 #            self.start = torch.load(path + ".sta")
 #            self.end = torch.load(path + ".end")
             self.lens = torch.load(path + '.lens')
+            self.sens = torch.load(path + '.sens')
             self.sen_num = sen_num
             return
         
@@ -50,7 +51,7 @@ class CustomDataset(Dataset):
         #read data
         inp = open(path, "rb")
         passages = json.load(inp)
-        sens = []
+        self.sens = []
         self.label,self.lens = [],[]
 #        self.start = []
 #        self.end = []
@@ -64,21 +65,23 @@ class CustomDataset(Dataset):
             if len(pass_sen) > sen_num:
                 pass_sen = pass_sen[0 : sen_num]
 #            self.start += [len(sens)]
-            sens += pass_sen
+            self.sens += pass_sen
+            print(self.sens)
 #            self.end += [len(sens)]
-            self.lens += [len(sens)]
+            self.lens += [len(pass_sen)]
             if train_model:
                 self.label += [passage["label"]]
             else:
                 self.label += [0]
         inp.close()
         print('begin incoding')
-        self.data = be.encode(sens) #every senetcne an encoding vector
+        self.data = be.encode(self.sens) #every senetcne an encoding vector
         self.data = torch.FloatTensor(self.data)
         
         torch.save(self.data, path + ".dat")
         torch.save(self.label, path + ".lab")
         torch.save(self.lens,path + '.lens')
+        torch.save(self.sens,path + '.sens')
 #        torch.save(self.start, path + ".sta")
 #        torch.save(self.end, path + ".end")
 
@@ -145,7 +148,7 @@ class CustomDataset(Dataset):
         _len =  self.lens[index]
         _sen_num = self.sen_num
         if _len < _sen_num: #add padding
-            para = torch.cat((para,torch.zeros((_sen_num-_len),768)),dim = 0)
+            para = torch.cat((para,torch.zeros((_sen_num - _len),768)),dim = 0)
     
 #        if self.end[index] - self.start[index] <= SEN_NUM:
 #            para = self.data[self.start[index] : self.end[index]]
