@@ -11,6 +11,7 @@ from torch.nn.utils import clip_grad_norm_
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from database import CustomDataset #, SEN_NUM
+import math
 #from model import CNN_Text, test
 
 #BERT_MAX_SEQ_LEN = 64
@@ -162,9 +163,13 @@ if __name__ == "__main__":
                     #print(val)
             if ite == 0:
                 pred_sum = pred
+                val_sum = val
             else:
                 pred_sum += pred
+                val_sum += val
         
+        val_sum = val_sum / iteration
+        val_sum = mlp.softmax(val_sum) #add softmax to ext semantics
         pred = torch.zeros(pred.shape).to(dtype=torch.int64)
         if use_cuda:
             pred = pred.cuda()
@@ -173,7 +178,7 @@ if __name__ == "__main__":
         labels = targ
 
         if predict:
-            return pred.cpu(),val.cpu()
+            return pred.cpu(),val_sum.cpu()
 
         right_num += labels[pred == labels].size(0)
         total_num += labels.size(0)
@@ -183,7 +188,7 @@ if __name__ == "__main__":
 
             
         if update_model:
-            print("train: loss: {} ".format(total_loss), end="")
+            print("train: loss: {} ".format(total_loss), end = "" )
         else:
             print("dev: ", end="")
         accuracy = float(right_num) / total_num
@@ -238,7 +243,7 @@ if __name__ == "__main__":
         passages = json.load(inp)
         for i in range(pred.shape[0]):
             #print(pred[i].item())
-            if 'label' not in passages.keys():
+            if 'label' not in passages[i].keys() or math.isnan(passages[i]['label']):
                 passages[i]['label'] = pred[i].item()
             passages[i]['semantic_value'] = val[i].detach().numpy().tolist() #get real semantics values
         inp.close()
