@@ -192,21 +192,21 @@ if __name__ == "__main__":
 #            print("train: loss: {} ".format(total_loss), end = "")
 #        else:
 #            print("dev: ", end="")
-        accuracy = float(right_num) / total_num
-        
-        print("accuracy: {} ".format(accuracy), end="")
-        if pos > 0:
-            precision = float(true_pos) / pos
-            print("precision: {} ".format(precision), end="")
-        if true > 0:
-            recall = float(true_pos) / true
-            print("recall: {} ".format(recall), end="")
-        if pos > 0 and true > 0 and (precision + recall) > 0:
-            F1 = 2.0 * precision * recall / (precision + recall)
-            print("F1: {} ".format(F1))
-            return F1
-        else:
-            print()
+#        accuracy = float(right_num) / total_num
+#        
+#        print("accuracy: {} ".format(accuracy), end="")
+#        if pos > 0:
+#            precision = float(true_pos) / pos
+#            print("precision: {} ".format(precision), end="")
+#        if true > 0:
+#            recall = float(true_pos) / true
+#            print("recall: {} ".format(recall), end="")
+#        if pos > 0 and true > 0 and (precision + recall) > 0:
+#            F1 = 2.0 * precision * recall / (precision + recall)
+#            print("F1: {} ".format(F1))
+#            return F1
+#        else:
+#            print()
         return None
 
     
