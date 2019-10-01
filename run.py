@@ -188,6 +188,7 @@ if __name__ == "__main__":
 
             
         if update_model:
+            
             print("train: loss: {} ".format(total_loss), end = "" )
         else:
             print("dev: ", end="")
