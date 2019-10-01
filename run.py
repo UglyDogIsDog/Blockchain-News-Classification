@@ -136,9 +136,11 @@ if __name__ == "__main__":
                     lens = lens.cuda()
                     labels = labels.cuda()
                 #print('input_dim:{}'.format(sens.shape))
-                h = lstm(sens, lens)
-                #print(h.shape) #see dimension
-                score = mlp(h) # B * Labels
+                with torch.no_grad():
+                    h = lstm(sens, lens)
+                    #print(h.shape) #see dimension
+                    score = mlp(h) # B * Labels
+
 
                 if update_model:
                     print('update model')
