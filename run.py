@@ -171,6 +171,7 @@ if __name__ == "__main__":
                 val_sum += val
         
         val_sum = val_sum / iteration
+        print(val_sum)
         #val_sum = mlp.softmax(val_sum) #add softmax to ext semantics
         pred = torch.zeros(pred.shape).to(dtype=torch.int64)
         if use_cuda:
