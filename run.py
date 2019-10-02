@@ -171,7 +171,7 @@ if __name__ == "__main__":
                 val_sum += val
         
         val_sum = val_sum / iteration
-        val_sum = mlp.softmax(val_sum) #add softmax to ext semantics
+        #val_sum = mlp.softmax(val_sum) #add softmax to ext semantics
         pred = torch.zeros(pred.shape).to(dtype=torch.int64)
         if use_cuda:
             pred = pred.cuda()
@@ -246,8 +246,8 @@ if __name__ == "__main__":
         passages = json.load(inp)
         for i in range(pred.shape[0]):
             #print(pred[i].item())
-            if 'label' not in passages[i].keys() or math.isnan(passages[i]['label']):
-                passages[i]['label'] = pred[i].item()
+#            if 'label' not in passages[i].keys() or math.isnan(passages[i]['label']):
+            passages[i]['label'] = pred[i].item()
             passages[i]['semantic_value'] = val[i].detach().numpy().tolist() #get real semantics values
         inp.close()
 
